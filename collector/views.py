@@ -1,7 +1,8 @@
 import random
 
 from django.conf import settings
-from django.db import transaction
+from django.core.cache import cache
+from django.db import IntegrityError, transaction
 from django.db.models import F
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
@@ -15,6 +16,22 @@ ALLOWED_MIME = ("audio/webm", "audio/ogg", "audio/mp4", "audio/mpeg", "audio/wav
 EXT = {"audio/webm": "webm", "audio/ogg": "ogg", "audio/mp4": "m4a", "audio/mpeg": "mp3", "audio/wav": "wav"}
 
 
+def _client_ip(request):
+    fwd = request.META.get("HTTP_X_FORWARDED_FOR", "")
+    return fwd.split(",")[0].strip() if fwd else request.META.get("REMOTE_ADDR", "")
+
+
+def _code_guess_limited(request):
+    """Throttle speaker-code guesses; a 6-character code is all that guards a speaker's data."""
+    key = f"codetry:{_client_ip(request)}"
+    try:
+        count = cache.incr(key)
+    except ValueError:
+        cache.set(key, 1, settings.CODE_ATTEMPT_WINDOW)
+        count = 1
+    return count > settings.CODE_ATTEMPT_LIMIT
+
+
 def current_speaker(request):
     sid = request.session.get("speaker_id")
     if not sid:
@@ -25,12 +42,16 @@ def current_speaker(request):
 def home(request):
     form = ResumeForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
-        sp = Speaker.objects.filter(code=form.cleaned_data["code"], withdrawn=False).first()
-        if sp:
-            request.session["speaker_id"] = str(sp.id)
-            request.session["batch_start"] = sp.recordings.count()
-            return redirect("record")
-        form.add_error("code", "That code wasn't found. Check it and try again.")
+        if _code_guess_limited(request):
+            form.add_error(None, "Too many attempts. Please wait a few minutes and try again.")
+        else:
+            sp = Speaker.objects.filter(code=form.cleaned_data["code"], withdrawn=False).first()
+            if sp:
+                request.session.cycle_key()
+                request.session["speaker_id"] = str(sp.id)
+                request.session["batch_start"] = sp.recordings.count()
+                return redirect("record")
+            form.add_error("code", "That code wasn't found. Check it and try again.")
     return render(request, "collector/home.html", {"form": form, "speaker": current_speaker(request)})
 
 
@@ -39,8 +60,14 @@ def consent(request):
     if request.method == "POST" and form.is_valid():
         request.session["consented_at"] = timezone.now().isoformat()
         return redirect("profile")
-    return render(request, "collector/consent.html",
-                  {"form": form, "version": settings.CONSENT_VERSION})
+    return render(request, "collector/consent.html", {
+        "form": form,
+        "version": settings.CONSENT_VERSION,
+        "researcher_name": settings.RESEARCHER_NAME,
+        "researcher_email": settings.RESEARCHER_EMAIL,
+        "supervisor_name": settings.SUPERVISOR_NAME,
+        "supervisor_email": settings.SUPERVISOR_EMAIL,
+    })
 
 
 def profile(request):
@@ -91,15 +118,19 @@ def withdraw(request):
     form = ResumeForm(request.POST or None)
     done_msg = None
     if request.method == "POST" and form.is_valid():
+        if _code_guess_limited(request):
+            form.add_error(None, "Too many attempts. Please wait a few minutes and try again.")
+            return render(request, "collector/withdraw.html", {"form": form, "done_msg": None})
         sp = Speaker.objects.filter(code=form.cleaned_data["code"]).first()
         if sp:
             with transaction.atomic():
-                for r in sp.recordings.all():
-                    r.audio.delete(save=False)
-                    Prompt.objects.filter(id=r.prompt_id).update(recording_count=F("recording_count") - 1)
-                sp.recordings.all().delete()
+                for prompt_id in sp.recordings.values_list("prompt_id", flat=True):
+                    Prompt.objects.filter(id=prompt_id, recording_count__gt=0).update(
+                        recording_count=F("recording_count") - 1)
+                sp.recordings.all().delete()   # post_delete signal removes the audio files
                 sp.withdrawn = True
-                sp.save(update_fields=["withdrawn"])
+                sp.withdrawn_at = timezone.now()
+                sp.save(update_fields=["withdrawn", "withdrawn_at"])
             request.session.flush()
             done_msg = "Your recordings have been deleted and you have been withdrawn from the study."
         else:
@@ -168,21 +199,26 @@ def api_upload(request):
     try:
         prompt = Prompt.objects.get(id=int(request.POST["prompt_id"]), active=True)
         duration = int(float(request.POST["duration_ms"]))
-        peak = float(request.POST["peak"])
+        peak = min(1.0, max(0.0, float(request.POST["peak"])))
+        clip_fraction = min(1.0, max(0.0, float(request.POST.get("clip_fraction", 0))))
     except (KeyError, ValueError, Prompt.DoesNotExist):
         return JsonResponse({"error": "bad request"}, status=400)
 
     mime = (f.content_type if f else "").split(";")[0]
     if not f or mime not in ALLOWED_MIME:
         return JsonResponse({"error": f"unsupported audio type {mime}"}, status=400)
+    if f.size > settings.MAX_UPLOAD_BYTES:
+        return JsonResponse({"error": "recording too large"}, status=400)
     if not settings.MIN_DURATION_MS <= duration <= settings.MAX_DURATION_MS:
         return JsonResponse({"error": "recording too short or too long"}, status=400)
-    if sp.recordings.filter(prompt=prompt).exists():
-        return JsonResponse(_prompt_payload(request, sp))  # double-submit; just move on
 
     f.name = f"clip.{EXT[mime]}"
-    with transaction.atomic():
-        Recording.objects.create(speaker=sp, prompt=prompt, audio=f, mime_type=mime,
-                                 duration_ms=duration, peak_level=peak)
-        Prompt.objects.filter(id=prompt.id).update(recording_count=F("recording_count") + 1)
+    try:
+        with transaction.atomic():
+            Recording.objects.create(speaker=sp, prompt=prompt, audio=f, mime_type=mime,
+                                     duration_ms=duration, peak_level=peak,
+                                     clip_fraction=clip_fraction)
+            Prompt.objects.filter(id=prompt.id).update(recording_count=F("recording_count") + 1)
+    except IntegrityError:
+        pass   # double-submit of the same prompt; keep the first clip and move on
     return JsonResponse(_prompt_payload(request, sp))

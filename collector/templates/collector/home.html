@@ -11,6 +11,7 @@
 <details class="resume">
   <summary>I've done this before and have a speaker code</summary>
   <form method="post">{% csrf_token %}
+    {{ form.non_field_errors }}
     {{ form.code.errors }}
     <label for="id_code">Your speaker code</label>
     <input id="id_code" name="code" autocomplete="off" autocapitalize="characters" maxlength="8" required>

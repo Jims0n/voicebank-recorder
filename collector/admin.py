@@ -30,7 +30,7 @@ class PromptAdmin(admin.ModelAdmin):
 @admin.register(Recording)
 class RecordingAdmin(admin.ModelAdmin):
     list_display = ("created_at", "speaker", "prompt_text", "player", "duration_ms",
-                    "peak_level", "status", "transcript_override")
+                    "peak_level", "clip_fraction", "status", "transcript_override")
     list_editable = ("status", "transcript_override")
     list_filter = ("status", "prompt__mode", "prompt__language", "prompt__intent", "speaker__gender")
     search_fields = ("speaker__code", "prompt__display_text", "transcript_override")

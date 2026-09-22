@@ -1,12 +1,19 @@
 import os
 from pathlib import Path
+
 import dj_database_url
+from django.core.exceptions import ImproperlyConfigured
+from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(BASE_DIR / ".env")
 env = os.environ.get
 
-SECRET_KEY = env("DJANGO_SECRET_KEY", "dev-only-insecure-key")
 DEBUG = env("DJANGO_DEBUG", "0") == "1"
+INSECURE_DEV_KEY = "dev-only-insecure-key"
+SECRET_KEY = env("DJANGO_SECRET_KEY") or INSECURE_DEV_KEY
+if not DEBUG and SECRET_KEY == INSECURE_DEV_KEY:
+    raise ImproperlyConfigured("Set DJANGO_SECRET_KEY before running with DJANGO_DEBUG=0.")
 ALLOWED_HOSTS = [h.strip() for h in env("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",") if h.strip()]
 CSRF_TRUSTED_ORIGINS = [f"https://{h}" for h in ALLOWED_HOSTS if h not in ("localhost", "127.0.0.1")]
 
@@ -45,8 +52,11 @@ TEMPLATES = [{
 }]
 WSGI_APPLICATION = "config.wsgi.application"
 
-DATABASES = {"default": dj_database_url.config(
-    default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}", conn_max_age=600)}
+# An empty DATABASE_URL must fall back to SQLite, so parse explicitly rather than
+# using dj_database_url.config(), which returns {} for a set-but-empty variable.
+DATABASE_URL = env("DATABASE_URL") or f"sqlite:///{BASE_DIR / 'db.sqlite3'}"
+DATABASES = {"default": dj_database_url.parse(
+    DATABASE_URL, conn_max_age=600, conn_health_checks=True)}
 
 LANGUAGE_CODE = "en-gb"
 TIME_ZONE = "Africa/Lagos"
@@ -64,6 +74,12 @@ STORAGES = {
     "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
 }
 if USE_S3:
+    # django-storages reads these from Django settings, not the environment.
+    AWS_STORAGE_BUCKET_NAME = env("AWS_STORAGE_BUCKET_NAME")
+    AWS_ACCESS_KEY_ID = env("AWS_ACCESS_KEY_ID")
+    AWS_SECRET_ACCESS_KEY = env("AWS_SECRET_ACCESS_KEY")
+    if not all([AWS_STORAGE_BUCKET_NAME, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY]):
+        raise ImproperlyConfigured("USE_S3=1 requires the bucket name, key id and secret.")
     AWS_S3_ENDPOINT_URL = env("AWS_S3_ENDPOINT_URL") or None
     AWS_S3_REGION_NAME = env("AWS_S3_REGION_NAME", "auto")
     AWS_DEFAULT_ACL = None          # bucket stays private
@@ -72,14 +88,21 @@ if USE_S3:
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 3 * 1024 * 1024
 FILE_UPLOAD_MAX_MEMORY_SIZE = 3 * 1024 * 1024
+MAX_UPLOAD_BYTES = 6 * 1024 * 1024   # a 15 s opus clip is ~40 KB; anything near this is abuse
 
 # Collection settings
 CONSENT_VERSION = env("CONSENT_VERSION", "v1")
+RESEARCHER_NAME = env("RESEARCHER_NAME", "Abdulateef Jimoh")
+RESEARCHER_EMAIL = env("RESEARCHER_EMAIL", "")
+SUPERVISOR_NAME = env("SUPERVISOR_NAME", "")
+SUPERVISOR_EMAIL = env("SUPERVISOR_EMAIL", "")
 BATCH_SIZE = 40            # prompts per sitting before offering a break
 MAX_PER_SPEAKER = 200      # cap so no single voice dominates the dataset
 ELICITED_SHARE = 0.3       # share of free-speech prompts vs read prompts
 MIN_DURATION_MS = 700
 MAX_DURATION_MS = 15000
+CODE_ATTEMPT_LIMIT = 8     # speaker-code guesses allowed per IP per window
+CODE_ATTEMPT_WINDOW = 900
 
 SESSION_COOKIE_AGE = 60 * 60 * 24 * 30
 if not DEBUG:

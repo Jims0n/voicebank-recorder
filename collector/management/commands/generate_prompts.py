@@ -79,13 +79,14 @@ class Command(BaseCommand):
 
         for tid, lang, intent, pattern in T.READ_TEMPLATES:
             n = o["per_template"] if "{" in pattern else 1
-            seen, tries = set(), 0
-            while len(seen) < n and tries < n * 20:
+            made, tries = 0, 0
+            while made < n and tries < n * 20:
                 tries += 1
                 transcript, ents = fill(pattern, intent, rng)
-                if transcript in seen or transcript in existing:
+                if transcript in existing:
                     continue
-                seen.add(transcript)
+                existing.add(transcript)
+                made += 1
                 Prompt.objects.create(mode="read", language=lang, intent=intent, template_id=tid,
                                       display_text=display(transcript), transcript=transcript,
                                       entities=ents)
@@ -93,7 +94,7 @@ class Command(BaseCommand):
 
         for tid, intent, pattern in T.ELICITED_TEMPLATES:
             for lang in ("pidgin", "english"):
-                for _ in range(o["elicited_per_template"] if "{" in pattern else 2):
+                for _ in range(o["elicited_per_template"] if "{" in pattern else 1):
                     ents = {"intent": intent}
                     ctx = {}
                     if "{amount_fmt}" in pattern:

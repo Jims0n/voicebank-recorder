@@ -35,6 +35,8 @@ fieldset ul, fieldset div > div { list-style: none; padding: 0; margin: 0; }
 fieldset label { display: flex; gap: .6rem; align-items: center; padding: .35rem 0; }
 input[type=text], input:not([type]), input[name=code], input[name=state], input[name=first_language_other] {
   font: inherit; width: 100%; padding: .7rem; border: 2px solid var(--line); border-radius: .5rem; }
+select { font: inherit; width: 100%; padding: .7rem; border: 2px solid var(--line);
+  border-radius: .5rem; background: var(--paper); color: var(--ink); min-height: 48px; }
 input[type=radio], input[type=checkbox] { width: 1.3rem; height: 1.3rem; accent-color: var(--green); }
 .check { display: flex; gap: .7rem; align-items: flex-start; }
 .errorlist { color: var(--red); list-style: none; padding: 0; margin: .3rem 0; }

@@ -127,6 +127,7 @@
     fd.append("prompt_id", prompt.id);
     fd.append("duration_ms", Math.round(duration));
     fd.append("peak", peak.toFixed(4));
+    fd.append("clip_fraction", clipFrac.toFixed(4));
     try { show(await api(app.dataset.upload, fd)); }
     catch (e) { status(`Couldn't save: ${e.message}. Check your connection and tap Save again.`, true); }
     finally { $("save").disabled = false; }
