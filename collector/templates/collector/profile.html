@@ -1,0 +1,16 @@
+{% extends "collector/base.html" %}
+{% block title %}About you{% endblock %}
+{% block content %}
+<h1>A bit about you</h1>
+<p class="lede">This helps us check the app works equally well for everyone.</p>
+<form method="post" class="stack">{% csrf_token %}
+  {% for field in form %}
+  <fieldset>
+    <legend>{{ field.label }}</legend>
+    {{ field }}
+    {{ field.errors }}
+  </fieldset>
+  {% endfor %}
+  <button class="btn primary">Start recording</button>
+</form>
+{% endblock %}

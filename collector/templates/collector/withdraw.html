@@ -1,0 +1,17 @@
+{% extends "collector/base.html" %}
+{% block title %}Withdraw{% endblock %}
+{% block content %}
+<h1>Withdraw from the study</h1>
+{% if done_msg %}
+  <p class="lede">{{ done_msg }}</p>
+{% else %}
+  <p class="lede">Enter your speaker code. All your recordings will be permanently deleted.</p>
+  <form method="post" class="stack">{% csrf_token %}
+    {{ form.code.errors }}
+    <label for="id_code">Speaker code</label>
+    <input id="id_code" name="code" autocomplete="off" autocapitalize="characters" maxlength="8" required>
+    <button class="btn danger">Delete my recordings</button>
+  </form>
+{% endif %}
+<p class="small"><a href="{% url 'home' %}">Back</a></p>
+{% endblock %}

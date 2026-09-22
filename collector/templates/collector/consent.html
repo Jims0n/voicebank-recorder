@@ -1,0 +1,21 @@
+{% extends "collector/base.html" %}
+{% block title %}Before you start{% endblock %}
+{% block content %}
+<h1>Before you start</h1>
+<div class="prose">
+<p><strong>What this is.</strong> A study by Abdulateef Jimoh, a Master of Information Technology student at Miva Open University, Abuja. It builds a voice interface for mobile banking that understands Nigerian Pidgin and Nigerian-accented English.</p>
+<p><strong>What you'll do.</strong> Read short banking commands aloud, or say them in your own words. Each clip is a few seconds long.</p>
+<p><strong>What we collect.</strong> Your voice recordings and a few general details: age range, gender, first language, the state you grew up in, and your phone's browser type. We do not collect your name, phone number, email, location, or any bank details. All names, amounts and account numbers in the prompts are made up.</p>
+<p><strong>How it's used.</strong> To train and test speech recognition models for this project. Recordings are stored in a private, access-controlled storage bucket and used only by the researcher and supervisor. Anonymised clips may later be shared as a research dataset for non-commercial use; this will be linked to your random speaker code only, never to your identity.</p>
+<p><strong>Your voice is personal data.</strong> Under the Nigeria Data Protection Act 2023, you can withdraw at any time. Use the speaker code we give you on the <a href="{% url 'withdraw' %}">withdrawal page</a> and all your recordings will be deleted. Recordings are kept until the project is examined, then either deleted or kept only in the anonymised dataset described above.</p>
+<p><strong>Taking part is voluntary.</strong> You can skip any prompt and stop whenever you like.</p>
+<p>Questions: <em>[your university email]</em>. Supervisor: <em>[supervisor name and email]</em>.</p>
+<p class="small">Consent version {{ version }}</p>
+</div>
+<form method="post" class="stack">{% csrf_token %}
+  {% for field in form %}
+  <label class="check">{{ field }} {{ field.label }}</label>{{ field.errors }}
+  {% endfor %}
+  <button class="btn primary">I agree, continue</button>
+</form>
+{% endblock %}

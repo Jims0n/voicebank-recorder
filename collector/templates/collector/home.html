@@ -1,0 +1,21 @@
+{% extends "collector/base.html" %}
+{% block content %}
+<h1>Help teach a banking app to understand Nigerian voices</h1>
+<p class="lede">Read short banking commands aloud, in Pidgin or English, the way you normally talk. About 10 minutes for 40 clips. You can stop any time.</p>
+<p>This is for a Master's research project at Miva Open University. No real money, no real accounts, and we never ask for your name or phone number.</p>
+{% if speaker %}
+  <a class="btn primary" href="{% url 'record' %}">Continue recording</a>
+{% else %}
+  <a class="btn primary" href="{% url 'consent' %}">Start</a>
+{% endif %}
+<details class="resume">
+  <summary>I've done this before and have a speaker code</summary>
+  <form method="post">{% csrf_token %}
+    {{ form.code.errors }}
+    <label for="id_code">Your speaker code</label>
+    <input id="id_code" name="code" autocomplete="off" autocapitalize="characters" maxlength="8" required>
+    <button class="btn">Continue</button>
+  </form>
+</details>
+<p class="small"><a href="{% url 'withdraw' %}">Withdraw and delete my recordings</a></p>
+{% endblock %}

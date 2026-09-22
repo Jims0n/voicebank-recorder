@@ -1,0 +1,40 @@
+{% extends "collector/base.html" %}
+{% load static %}
+{% block title %}Recording{% endblock %}
+{% block content %}
+<div id="app" class="rec"
+     data-min-ms="{{ min_ms }}" data-max-ms="{{ max_ms }}"
+     data-next="{% url 'api_next' %}" data-skip="{% url 'api_skip' %}"
+     data-upload="{% url 'api_upload' %}" data-done="{% url 'done' %}">
+
+  <div class="progress" aria-hidden="true"><span id="bar"></span></div>
+  <p class="count"><span id="count">0</span> of {{ batch_size }}</p>
+
+  <section class="prompt" aria-live="polite">
+    <p id="instruction" class="instruction">Say this:</p>
+    <p id="prompt" class="prompt-text">Loading…</p>
+  </section>
+
+  <p id="status" class="status" role="status">Tap the button and speak.</p>
+  <div class="meter" aria-hidden="true"><span id="level"></span></div>
+
+  <div class="controls">
+    <button id="rec" class="rec-btn" aria-label="Start recording"><span></span></button>
+  </div>
+
+  <div id="review" class="review" hidden>
+    <audio id="playback" controls></audio>
+    <div class="row">
+      <button id="redo" class="btn">Record again</button>
+      <button id="save" class="btn primary">Save and next</button>
+    </div>
+  </div>
+
+  <p class="row small">
+    <button id="skip" class="link">Skip this one</button>
+    <span>Speaker code: <strong>{{ speaker.code }}</strong></span>
+  </p>
+  {% csrf_token %}
+</div>
+<script src="{% static 'collector/recorder.js' %}"></script>
+{% endblock %}

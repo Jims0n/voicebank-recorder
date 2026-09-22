@@ -1,0 +1,13 @@
+{% extends "collector/base.html" %}
+{% block title %}Thank you{% endblock %}
+{% block content %}
+<h1>Thank you. That's {{ total }} clips.</h1>
+<p class="lede">Keep your speaker code. You need it to add more recordings later or to withdraw.</p>
+<p class="code">{{ speaker.code }}</p>
+{% if can_continue %}
+<form method="post" action="{% url 'next_batch' %}">{% csrf_token %}
+  <button class="btn primary">Record another 40</button>
+</form>
+{% endif %}
+<p>Know someone else who speaks Pidgin or Nigerian English? Share this page with them.</p>
+{% endblock %}

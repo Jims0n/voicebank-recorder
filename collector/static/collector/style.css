@@ -1,0 +1,69 @@
+/* System fonts on purpose: volunteers are on cheap phones and paid data. */
+:root {
+  --paper: #ffffff;
+  --ink: #172033;
+  --muted: #5b6475;
+  --panel: #eef4f1;
+  --green: #0b7a55;
+  --red: #d7263d;
+  --line: #d6dde3;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--paper); color: var(--ink);
+  font: 17px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+.wrap { max-width: 34rem; margin: 0 auto; padding: 1.25rem 1.1rem 3rem; }
+h1 { font-size: 1.6rem; line-height: 1.2; margin: .5rem 0 1rem; }
+.lede { font-size: 1.1rem; color: var(--muted); }
+.small { font-size: .9rem; color: var(--muted); }
+a { color: var(--green); }
+.prose p { margin: 0 0 .9rem; }
+
+.btn { display: inline-block; font: inherit; font-weight: 600; padding: .8rem 1.2rem;
+  border-radius: .6rem; border: 2px solid var(--ink); background: var(--paper); color: var(--ink);
+  text-decoration: none; cursor: pointer; min-height: 48px; }
+.btn.primary { background: var(--green); border-color: var(--green); color: #fff; }
+.btn.danger { background: var(--red); border-color: var(--red); color: #fff; }
+.btn:disabled { opacity: .5; cursor: default; }
+.link { background: none; border: 0; color: var(--muted); font: inherit; text-decoration: underline; padding: .5rem 0; cursor: pointer; }
+:focus-visible { outline: 3px solid #f0b429; outline-offset: 2px; }
+
+.stack { display: grid; gap: 1rem; margin-top: 1rem; }
+fieldset { border: 1px solid var(--line); border-radius: .6rem; padding: .6rem .9rem .8rem; margin: 0; }
+legend { font-weight: 600; padding: 0 .3rem; }
+fieldset ul, fieldset div > div { list-style: none; padding: 0; margin: 0; }
+fieldset label { display: flex; gap: .6rem; align-items: center; padding: .35rem 0; }
+input[type=text], input:not([type]), input[name=code], input[name=state], input[name=first_language_other] {
+  font: inherit; width: 100%; padding: .7rem; border: 2px solid var(--line); border-radius: .5rem; }
+input[type=radio], input[type=checkbox] { width: 1.3rem; height: 1.3rem; accent-color: var(--green); }
+.check { display: flex; gap: .7rem; align-items: flex-start; }
+.errorlist { color: var(--red); list-style: none; padding: 0; margin: .3rem 0; }
+.resume { margin: 2rem 0 1rem; }
+.resume form { display: grid; gap: .6rem; margin-top: .8rem; }
+.code { font-size: 2.6rem; font-weight: 700; letter-spacing: .15em; margin: .5rem 0 1.5rem; }
+
+/* Recorder: the prompt is the hero, the button sits in thumb reach. */
+.rec { display: flex; flex-direction: column; min-height: calc(100vh - 4rem); }
+.progress { height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; }
+.progress span { display: block; height: 100%; width: 0; background: var(--green); transition: width .3s; }
+.count { margin: .4rem 0 0; font-size: .9rem; color: var(--muted); }
+.prompt { background: var(--panel); border-radius: 1rem; padding: 1.4rem 1.2rem; margin: 1rem 0; }
+.instruction { margin: 0 0 .4rem; color: var(--muted); font-size: .95rem; }
+.prompt-text { margin: 0; font-size: 1.85rem; line-height: 1.25; font-weight: 600; }
+.prompt.elicited .prompt-text { font-size: 1.4rem; font-weight: 500; }
+.status { min-height: 1.5em; margin: .3rem 0; }
+.status.error { color: var(--red); font-weight: 600; }
+.meter { height: 8px; background: var(--line); border-radius: 4px; overflow: hidden; }
+.meter span { display: block; height: 100%; width: 0; background: var(--green); }
+.controls { display: flex; justify-content: center; margin: auto 0 1rem; padding-top: 1.5rem; }
+.rec-btn { width: 96px; height: 96px; border-radius: 50%; border: 4px solid var(--red);
+  background: var(--paper); display: grid; place-items: center; cursor: pointer; }
+.rec-btn span { width: 64px; height: 64px; border-radius: 50%; background: var(--red); transition: all .15s; }
+.rec-btn.recording span { width: 34px; height: 34px; border-radius: 6px; }
+.rec-btn.recording { animation: pulse 1.2s ease-in-out infinite; }
+@keyframes pulse { 50% { box-shadow: 0 0 0 12px rgba(215,38,61,.15); } }
+.review { display: grid; gap: .8rem; margin-bottom: 1rem; }
+.review audio { width: 100%; }
+.row { display: flex; gap: .8rem; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+.row .btn { flex: 1; }
+@media (prefers-reduced-motion: reduce) { .rec-btn.recording { animation: none; } * { transition: none !important; } }
