@@ -29,7 +29,7 @@ BILLERS = [("DSTV", "dstv"), ("GOtv", "gotv"), ("IKEDC", "ikedc"), ("EKEDC", "ek
 AMOUNTS = [
     (500, ["five hundred naira", "five hundred"]),
     (1000, ["one thousand naira", "a thousand naira", "one k"]),
-    (1500, ["one thousand five hundred naira", "fifteen hundred naira", "one point five k"]),
+    (1500, ["one thousand five hundred naira", "one point five k"]),
     (2000, ["two thousand naira", "two k"]),
     (2500, ["two thousand five hundred naira", "two point five k"]),
     (5000, ["five thousand naira", "five k", "five thousand"]),
@@ -167,18 +167,23 @@ READ_TEMPLATES = [
 # Elicited prompts: speaker sees a task, says it their own way. Transcript is blank
 # (transcribe later), but the ground-truth entities are known, so amount accuracy
 # can be measured on natural speech.
+# Wording rule: one short sentence of scene, then a plain instruction starting with
+# a verb. No dashes, no brackets. A volunteer reads these once, on a phone, in noise.
 ELICITED_TEMPLATES = [
     ("el_tr_01", "transfer", "Ask the app to send ₦{amount_fmt} to {name}."),
     ("el_tr_02", "transfer", "Ask the app to send ₦{amount_fmt} to {name}'s {bank} account."),
-    ("el_tr_03", "transfer", "Ask the app to send ₦{amount_fmt} to account {acct_digits} ({bank})."),
+    ("el_tr_03", "transfer", "Ask the app to send ₦{amount_fmt} to {bank} account {acct_digits}."),
     ("el_ai_01", "airtime", "Ask the app to buy ₦{amount_fmt} {network} airtime."),
     ("el_bi_01", "bill", "Ask the app to pay ₦{amount_fmt} for your {biller} subscription."),
     ("el_ba_01", "balance", "Ask the app how much money is in your account."),
     ("el_hi_01", "history", "Ask the app to show you what you have spent recently."),
-    ("el_cf_01", "confirm", "The app just read back your transfer correctly. Tell it to go ahead."),
-    ("el_cf_02", "confirm", "The app says: send ₦{amount_fmt} to {name}. That is right — tell it to send."),
+    ("el_cf_01", "confirm", "The app has read your transfer back to you and it is correct. "
+                            "Tell it to go ahead and send."),
+    ("el_cf_02", "confirm", "The app asks: send ₦{amount_fmt} to {name}? "
+                            "That is what you wanted. Tell it yes."),
     ("el_cn_01", "cancel", "The app read back the wrong amount. Tell it to stop."),
-    ("el_cn_02", "cancel", "The app is about to send ₦{amount_fmt} to the wrong person. Stop it."),
+    ("el_cn_02", "cancel", "The app is about to send ₦{amount_fmt} to the wrong person. "
+                           "Tell it to stop."),
 ]
 
 DIGITS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]

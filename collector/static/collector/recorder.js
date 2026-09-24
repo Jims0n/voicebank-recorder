@@ -7,7 +7,6 @@
   let prompt = null, stream = null, recorder = null, chunks = [], blob = null;
   let t0 = 0, duration = 0, peak = 0, clipFrac = 0, raf = null, stopTimer = null;
   let audioCtx = null, analyser = null;
-
   // Pick a format the browser can record. Chrome/Android: webm/opus. iOS Safari: mp4/aac.
   const MIME = ["audio/webm;codecs=opus", "audio/webm", "audio/ogg;codecs=opus", "audio/mp4"]
     .find((m) => window.MediaRecorder && MediaRecorder.isTypeSupported(m)) || "";
@@ -45,6 +44,14 @@
     return data;
   }
 
+  function ensureAudioCtx() {
+    // Must be built and resumed inside the tap handler. iOS Safari refuses to start a
+    // context created after an await, and the analyser then reads pure silence.
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === "suspended") audioCtx.resume();
+    return audioCtx;
+  }
+
   async function ensureMic() {
     if (stream) return;
     // Browser processing OFF: we want the raw signal and add noise ourselves later.
@@ -52,10 +59,15 @@
     stream = await navigator.mediaDevices.getUserMedia({
       audio: { channelCount: 1, echoCancellation: false, noiseSuppression: false, autoGainControl: false },
     });
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    ensureAudioCtx();
     analyser = audioCtx.createAnalyser();
     analyser.fftSize = 2048;
     audioCtx.createMediaStreamSource(stream).connect(analyser);
+    // iOS stops pulling audio through a graph that reaches no destination, so give it
+    // a silent one. Gain is 0, nothing is played back to the speaker.
+    const mute = audioCtx.createGain();
+    mute.gain.value = 0;
+    analyser.connect(mute).connect(audioCtx.destination);
   }
 
   function meter() {
@@ -101,7 +113,9 @@
     blob = new Blob(chunks, { type: recorder.mimeType || MIME || "audio/webm" });
 
     if (duration < MIN_MS) { status("That was too short. Try again.", true); blob = null; return; }
-    if (peak < 0.02) { status("We couldn't hear anything. Check your mic and try again.", true); blob = null; return; }
+    // A working meter never reports exactly zero, even in a silent room. Exactly zero
+    // means the analyser failed, so trust the recording rather than discard it.
+    if (peak > 0 && peak < 0.02) { status("We couldn't hear anything. Check your mic and try again.", true); blob = null; return; }
 
     $("playback").src = URL.createObjectURL(blob);
     $("rec").hidden = true;
@@ -112,7 +126,8 @@
   }
 
   $("rec").addEventListener("click", () => {
-    if (recorder && recorder.state === "recording") recorder.stop(); else start();
+    if (recorder && recorder.state === "recording") recorder.stop();
+    else { ensureAudioCtx(); start(); }
   });
 
   $("redo").addEventListener("click", () => { $("review").hidden = true; $("rec").hidden = false; blob = null; start(); });

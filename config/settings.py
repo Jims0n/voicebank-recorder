@@ -15,7 +15,11 @@ SECRET_KEY = env("DJANGO_SECRET_KEY") or INSECURE_DEV_KEY
 if not DEBUG and SECRET_KEY == INSECURE_DEV_KEY:
     raise ImproperlyConfigured("Set DJANGO_SECRET_KEY before running with DJANGO_DEBUG=0.")
 ALLOWED_HOSTS = [h.strip() for h in env("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",") if h.strip()]
-CSRF_TRUSTED_ORIGINS = [f"https://{h}" for h in ALLOWED_HOSTS if h not in ("localhost", "127.0.0.1")]
+# A leading dot in ALLOWED_HOSTS means "any subdomain"; CSRF wants that as *.example.com.
+CSRF_TRUSTED_ORIGINS = [
+    f"https://*{h}" if h.startswith(".") else f"https://{h}"
+    for h in ALLOWED_HOSTS if h not in ("localhost", "127.0.0.1")
+]
 
 INSTALLED_APPS = [
     "django.contrib.admin",

@@ -12,14 +12,16 @@ class AudioQualityFilter(admin.SimpleListFilter):
 
     def lookups(self, request, model_admin):
         return [("clipped", "Clipped / distorted"), ("quiet", "Too quiet"),
-                ("short", "Very short"), ("ok", "No flags")]
+                ("short", "Very short"), ("nometer", "No level reading"), ("ok", "No flags")]
 
     def queryset(self, request, qs):
-        flags = Q(clip_fraction__gt=0.02) | Q(peak_level__lt=0.08) | Q(duration_ms__lt=1000)
+        flags = (Q(clip_fraction__gt=0.02) | Q(peak_level__lt=0.08)
+                 | Q(duration_ms__lt=1000))
         return {
             "clipped": qs.filter(clip_fraction__gt=0.02),
-            "quiet": qs.filter(peak_level__lt=0.08),
+            "quiet": qs.filter(peak_level__gt=0, peak_level__lt=0.08),
             "short": qs.filter(duration_ms__lt=1000),
+            "nometer": qs.filter(peak_level=0),
             "ok": qs.exclude(flags),
         }.get(self.value(), qs)
 
@@ -83,8 +85,10 @@ class RecordingAdmin(admin.ModelAdmin):
         flags = []
         if obj.clip_fraction > 0.02:
             flags.append("clipped")
-        if obj.peak_level < 0.08:
+        if 0 < obj.peak_level < 0.08:
             flags.append("quiet")
+        if obj.peak_level == 0:
+            flags.append("no meter")
         if obj.duration_ms < 1000:
             flags.append("short")
         if not flags:
