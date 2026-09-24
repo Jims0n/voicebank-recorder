@@ -206,6 +206,15 @@ class LabelTests(TestCase):
 
 
 class PromptGenerationTests(TestCase):
+    def test_rerunning_creates_nothing(self):
+        """build.sh runs this on every deploy; a second run must be a no-op."""
+        from django.core.management import call_command
+        call_command("generate_prompts", verbosity=0)
+        after_first = Prompt.objects.count()
+        call_command("generate_prompts", verbosity=0)
+        call_command("generate_prompts", verbosity=0)
+        self.assertEqual(Prompt.objects.count(), after_first)
+
     def test_read_transcripts_are_unique(self):
         from django.core.management import call_command
         call_command("generate_prompts", verbosity=0)

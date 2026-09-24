@@ -3,6 +3,7 @@ import re
 
 from django.core.management.base import BaseCommand
 from django.db import transaction
+from django.db.models import Count
 
 from collector import bank_templates as T
 from collector.models import Prompt
@@ -70,50 +71,57 @@ class Command(BaseCommand):
     @transaction.atomic
     def handle(self, *a, **o):
         rng = random.Random(o["seed"])
+        erng = random.Random(o["seed"] + 1)
         if o["reset"]:
             deleted, _ = Prompt.objects.filter(recording_count=0).delete()
             self.stdout.write(f"deleted {deleted} unrecorded prompts")
 
+        # Idempotency is by target count per (template, language), not by content.
+        # fill() draws from a large random space, so a re-run would otherwise invent
+        # fresh combinations that are not duplicates and pile them up forever.
+        have = {(tid, lang): n for tid, lang, n in Prompt.objects
+                .values_list("template_id", "language").annotate(n=Count("id"))}
         existing = set(Prompt.objects.values_list("transcript", flat=True))
         created = 0
 
         for tid, lang, intent, pattern in T.READ_TEMPLATES:
-            n = o["per_template"] if "{" in pattern else 1
-            made, tries = 0, 0
-            while made < n and tries < n * 20:
+            target = o["per_template"] if "{" in pattern else 1
+            need, tries = target - have.get((tid, lang), 0), 0
+            while need > 0 and tries < target * 20:
                 tries += 1
                 transcript, ents = fill(pattern, intent, rng)
                 if transcript in existing:
                     continue
                 existing.add(transcript)
-                made += 1
+                need -= 1
                 Prompt.objects.create(mode="read", language=lang, intent=intent, template_id=tid,
                                       display_text=display(transcript), transcript=transcript,
                                       entities=ents)
                 created += 1
 
         for tid, intent, pattern in T.ELICITED_TEMPLATES:
+            target = o["elicited_per_template"] if "{" in pattern else 1
             for lang in ("pidgin", "english"):
-                for _ in range(o["elicited_per_template"] if "{" in pattern else 1):
+                for _ in range(max(0, target - have.get((tid, lang), 0))):
                     ents = {"intent": intent}
                     ctx = {}
                     if "{amount_fmt}" in pattern:
                         pool = T.AIRTIME_AMOUNTS if intent == "airtime" else T.AMOUNTS
-                        v, _f = rng.choice(pool)
+                        v, _f = erng.choice(pool)
                         ctx["amount_fmt"] = f"{v:,}"
                         ents["amount"] = v
                     if "{name}" in pattern:
-                        ctx["name"] = ents["recipient"] = rng.choice(T.NAMES)
+                        ctx["name"] = ents["recipient"] = erng.choice(T.NAMES)
                     if "{bank}" in pattern:
-                        ctx["bank"] = ents["bank"] = rng.choice(T.BANKS)[0]
+                        ctx["bank"] = ents["bank"] = erng.choice(T.BANKS)[0]
                     if "{acct_digits}" in pattern:
-                        acct = fake_nuban(rng)
+                        acct = fake_nuban(erng)
                         ctx["acct_digits"] = f"{acct[:4]} {acct[4:7]} {acct[7:]}"
                         ents["account"] = acct
                     if "{network}" in pattern:
-                        ctx["network"] = ents["network"] = rng.choice(T.NETWORKS)[0]
+                        ctx["network"] = ents["network"] = erng.choice(T.NETWORKS)[0]
                     if "{biller}" in pattern:
-                        ctx["biller"] = ents["biller"] = rng.choice(T.BILLERS)[0]
+                        ctx["biller"] = ents["biller"] = erng.choice(T.BILLERS)[0]
                     Prompt.objects.create(mode="elicited", language=lang, intent=intent,
                                           template_id=tid, display_text=pattern.format(**ctx),
                                           transcript="", entities=ents)

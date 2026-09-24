@@ -2,6 +2,9 @@
   const app = document.getElementById("app");
   const $ = (id) => document.getElementById(id);
   const MIN_MS = +app.dataset.minMs, MAX_MS = +app.dataset.maxMs;
+  // Peak thresholds, as a fraction of full scale. SILENT means the mic produced nothing
+  // usable; QUIET only warns, because a quiet clip is still trainable data.
+  const SILENT = 0.005, QUIET = 0.05;
   const csrf = document.querySelector("[name=csrfmiddlewaretoken]").value;
 
   let prompt = null, stream = null, recorder = null, chunks = [], blob = null;
@@ -115,14 +118,22 @@
     if (duration < MIN_MS) { status("That was too short. Try again.", true); blob = null; return; }
     // A working meter never reports exactly zero, even in a silent room. Exactly zero
     // means the analyser failed, so trust the recording rather than discard it.
-    if (peak > 0 && peak < 0.02) { status("We couldn't hear anything. Check your mic and try again.", true); blob = null; return; }
+    // Only a near-dead signal is discarded: real speech with auto-gain off often peaks
+    // around 0.03, so a higher gate would throw away usable clips from soft speakers.
+    if (peak > 0 && peak < SILENT) { status("We couldn't hear anything. Check your mic and try again.", true); blob = null; return; }
 
     $("playback").src = URL.createObjectURL(blob);
     $("rec").hidden = true;
     $("review").hidden = false;
-    status(clipFrac > 0.02
-      ? "It sounds a bit loud and may be distorted. Hold the phone a little further away and record again if you can."
-      : "Listen back. If it sounds right, save it.", clipFrac > 0.02);
+    let msg = "Listen back. If it sounds right, save it.", warn = false;
+    if (clipFrac > 0.02) {
+      msg = "It sounds a bit loud and may be distorted. Hold the phone a little further away and record again if you can.";
+      warn = true;
+    } else if (peak > 0 && peak < QUIET) {
+      msg = "That sounded quiet. Hold the phone closer and record again, or save it if it plays back clearly.";
+      warn = true;
+    }
+    status(msg, warn);
   }
 
   $("rec").addEventListener("click", () => {
