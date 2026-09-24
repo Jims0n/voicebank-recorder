@@ -45,13 +45,18 @@ def home(request):
         if _code_guess_limited(request):
             form.add_error(None, "Too many attempts. Please wait a few minutes and try again.")
         else:
-            sp = Speaker.objects.filter(code=form.cleaned_data["code"], withdrawn=False).first()
-            if sp:
+            sp = Speaker.objects.filter(code=form.cleaned_data["code"]).first()
+            if sp and not sp.withdrawn:
                 request.session.cycle_key()
                 request.session["speaker_id"] = str(sp.id)
                 request.session["batch_start"] = sp.recordings.count()
                 return redirect("record")
-            form.add_error("code", "That code wasn't found. Check it and try again.")
+            if sp:
+                # Saying "not found" here makes a withdrawn volunteer retype until throttled.
+                form.add_error("code", "That code was withdrawn from the study and its recordings "
+                                       "were deleted. You are welcome to start again with Start above.")
+            else:
+                form.add_error("code", "That code wasn't found. Check it and try again.")
     return render(request, "collector/home.html", {"form": form, "speaker": current_speaker(request)})
 
 

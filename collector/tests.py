@@ -164,6 +164,17 @@ class WithdrawalTests(TestCase):
             res = self.client.post(reverse("withdraw"), {"code": "ZZZZZZ"})
         self.assertContains(res, "Too many attempts")
 
+    def test_withdrawn_code_cannot_resume_and_says_so(self):
+        speaker = make_speaker(withdrawn=True, withdrawn_at=timezone.now())
+        res = self.client.post(reverse("home"), {"code": speaker.code})
+        self.assertEqual(res.status_code, 200)
+        self.assertContains(res, "withdrawn from the study")
+        self.assertNotIn("speaker_id", self.client.session)
+
+    def test_unknown_code_is_reported_as_not_found(self):
+        res = self.client.post(reverse("home"), {"code": "ZZZZZZ"})
+        self.assertContains(res, "wasn&#x27;t found")
+
 
 class ExportSplitTests(TestCase):
     def test_split_is_deterministic_and_speaker_disjoint(self):
