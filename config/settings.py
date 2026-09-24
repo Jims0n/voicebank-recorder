@@ -74,6 +74,8 @@ STORAGES = {
     "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
 }
 if USE_S3:
+    from botocore.config import Config as BotoConfig
+
     # django-storages reads these from Django settings, not the environment.
     AWS_STORAGE_BUCKET_NAME = env("AWS_STORAGE_BUCKET_NAME")
     AWS_ACCESS_KEY_ID = env("AWS_ACCESS_KEY_ID")
@@ -85,6 +87,14 @@ if USE_S3:
     AWS_DEFAULT_ACL = None          # bucket stays private
     AWS_QUERYSTRING_AUTH = True     # signed URLs for admin playback
     AWS_S3_FILE_OVERWRITE = False
+    # botocore >=1.36 sends CRC32 checksums on every PUT, which non-AWS S3
+    # implementations (R2, Backblaze, MinIO) may reject. Only send when required.
+    AWS_S3_CLIENT_CONFIG = BotoConfig(
+        signature_version="s3v4",
+        request_checksum_calculation="when_required",
+        response_checksum_validation="when_required",
+        retries={"max_attempts": 3, "mode": "standard"},
+    )
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 3 * 1024 * 1024
 FILE_UPLOAD_MAX_MEMORY_SIZE = 3 * 1024 * 1024
