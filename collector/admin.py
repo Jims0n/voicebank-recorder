@@ -1,8 +1,44 @@
 from django.contrib import admin
-from django.db.models import Count, Sum
+from django.db.models import Count, Q, Sum
 from django.utils.html import format_html
 
 from .models import Prompt, Recording, Speaker
+
+
+class AudioQualityFilter(admin.SimpleListFilter):
+    """Triage hundreds of clips without listening to every one."""
+    title = "audio quality"
+    parameter_name = "quality"
+
+    def lookups(self, request, model_admin):
+        return [("clipped", "Clipped / distorted"), ("quiet", "Too quiet"),
+                ("short", "Very short"), ("ok", "No flags")]
+
+    def queryset(self, request, qs):
+        flags = Q(clip_fraction__gt=0.02) | Q(peak_level__lt=0.08) | Q(duration_ms__lt=1000)
+        return {
+            "clipped": qs.filter(clip_fraction__gt=0.02),
+            "quiet": qs.filter(peak_level__lt=0.08),
+            "short": qs.filter(duration_ms__lt=1000),
+            "ok": qs.exclude(flags),
+        }.get(self.value(), qs)
+
+
+class NeedsTranscriptFilter(admin.SimpleListFilter):
+    """Elicited clips carry no transcript until someone types one."""
+    title = "transcript"
+    parameter_name = "needs_transcript"
+
+    def lookups(self, request, model_admin):
+        return [("yes", "Missing (elicited)"), ("no", "Present")]
+
+    def queryset(self, request, qs):
+        missing = Q(transcript_override="") & Q(prompt__transcript="")
+        if self.value() == "yes":
+            return qs.filter(missing)
+        if self.value() == "no":
+            return qs.exclude(missing)
+        return qs
 
 
 @admin.register(Speaker)
@@ -30,15 +66,30 @@ class PromptAdmin(admin.ModelAdmin):
 @admin.register(Recording)
 class RecordingAdmin(admin.ModelAdmin):
     list_display = ("created_at", "speaker", "prompt_text", "player", "duration_ms",
-                    "peak_level", "clip_fraction", "status", "transcript_override")
+                    "quality", "status", "transcript_override")
     list_editable = ("status", "transcript_override")
-    list_filter = ("status", "prompt__mode", "prompt__language", "prompt__intent", "speaker__gender")
+    list_filter = ("status", AudioQualityFilter, NeedsTranscriptFilter, "prompt__mode",
+                   "prompt__language", "prompt__intent", "speaker__gender")
     search_fields = ("speaker__code", "prompt__display_text", "transcript_override")
     list_per_page = 50
+    list_select_related = ("speaker", "prompt")
     actions = ["approve", "reject"]
 
     def prompt_text(self, obj):
         return obj.prompt.display_text
+
+    @admin.display(description="quality")
+    def quality(self, obj):
+        flags = []
+        if obj.clip_fraction > 0.02:
+            flags.append("clipped")
+        if obj.peak_level < 0.08:
+            flags.append("quiet")
+        if obj.duration_ms < 1000:
+            flags.append("short")
+        if not flags:
+            return format_html('<span style="color:#0b7a55">ok</span>')
+        return format_html('<span style="color:#d7263d">{}</span>', ", ".join(flags))
 
     def player(self, obj):
         return format_html('<audio controls preload="none" src="{}" style="height:32px"></audio>', obj.audio.url)

@@ -12,9 +12,15 @@ Fix this before the first recording. Changing it later means relabelling everyth
 
 ## Pidgin spelling (one form per word)
 abeg · wetin · dey · don · wan · am · na · comot · una · sef · oya · make (not "mek") ·
-dem (not "them" when it's the Pidgin plural marker) · e (it/he/she) · no be
+dem (not "them" when it's the Pidgin plural marker) · e (it/he/she) · no be · wey (not "we") ·
+na him · na so · that one
 
 Add to this list as new words appear, and never spell the same word two ways.
+
+## Confirm and cancel
+Treat these as the highest-stakes labels in the set. A confirm mislabelled as a cancel
+(or the reverse) teaches the model to move money against the speaker's intent. When in
+doubt about a confirm/cancel clip, reject it rather than guess.
 
 ## Elicited clips
 Transcribe verbatim in the admin (`transcript_override`). Fast method: run Whisper-large

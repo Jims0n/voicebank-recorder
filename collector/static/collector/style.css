@@ -9,6 +9,9 @@
   --line: #d6dde3;
 }
 * { box-sizing: border-box; }
+/* Author `display` rules beat the UA stylesheet's [hidden]{display:none}, so the
+   recorder's hidden panels would otherwise stay on screen. Keep this first. */
+[hidden] { display: none !important; }
 html { -webkit-text-size-adjust: 100%; }
 body { margin: 0; background: var(--paper); color: var(--ink);
   font: 17px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
