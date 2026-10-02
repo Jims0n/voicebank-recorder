@@ -58,6 +58,7 @@ input[type=radio], input[type=checkbox] { width: 1.3rem; height: 1.3rem; accent-
 .prompt.elicited .prompt-text { font-size: 1.4rem; font-weight: 500; }
 .status { min-height: 1.5em; margin: .3rem 0; }
 .status.error { color: var(--red); font-weight: 600; }
+.status.notice { color: #8a5a00; font-weight: 600; }
 .meter { height: 8px; background: var(--line); border-radius: 4px; overflow: hidden; }
 .meter span { display: block; height: 100%; width: 0; background: var(--green); }
 .controls { display: flex; justify-content: center; margin: auto 0 1rem; padding-top: 1.5rem; }

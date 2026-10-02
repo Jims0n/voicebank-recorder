@@ -2,9 +2,10 @@
   const app = document.getElementById("app");
   const $ = (id) => document.getElementById(id);
   const MIN_MS = +app.dataset.minMs, MAX_MS = +app.dataset.maxMs;
-  // Peak thresholds, as a fraction of full scale. SILENT means the mic produced nothing
-  // usable; QUIET only warns, because a quiet clip is still trainable data.
-  const SILENT = 0.005, QUIET = 0.05;
+  // Only a near-dead signal is worth discarding. With auto-gain off, good speech on a
+  // phone peaks around 0.02-0.03, so anything higher would reject usable clips.
+  // Quiet-but-audible level is recorded on the clip and triaged later in the admin.
+  const SILENT = 0.005;
   const csrf = document.querySelector("[name=csrfmiddlewaretoken]").value;
 
   let prompt = null, stream = null, recorder = null, chunks = [], blob = null;
@@ -14,9 +15,13 @@
   const MIME = ["audio/webm;codecs=opus", "audio/webm", "audio/ogg;codecs=opus", "audio/mp4"]
     .find((m) => window.MediaRecorder && MediaRecorder.isTypeSupported(m)) || "";
 
-  function status(msg, isError = false) {
-    $("status").textContent = msg;
-    $("status").classList.toggle("error", isError);
+  // tone: "" normal, "notice" advisory, "error" something actually went wrong.
+  // Red is reserved for errors; a volunteer who sees red after a good take assumes failure.
+  function status(msg, tone = "") {
+    const el = $("status");
+    el.textContent = msg;
+    el.classList.toggle("error", tone === "error");
+    el.classList.toggle("notice", tone === "notice");
   }
 
   function show(p) {
@@ -91,7 +96,7 @@
 
   async function start() {
     try { await ensureMic(); }
-    catch { status("Microphone blocked. Allow microphone access in your browser settings, then reload.", true); return; }
+    catch { status("Microphone blocked. Allow microphone access in your browser settings, then reload.", "error"); return; }
     if (audioCtx.state === "suspended") await audioCtx.resume();
     chunks = []; peak = 0; clipFrac = 0;
     recorder = new MediaRecorder(stream, MIME ? { mimeType: MIME } : undefined);
@@ -115,7 +120,7 @@
     duration = performance.now() - t0;
     blob = new Blob(chunks, { type: recorder.mimeType || MIME || "audio/webm" });
 
-    if (duration < MIN_MS) { status("That was too short. Try again.", true); blob = null; return; }
+    if (duration < MIN_MS) { status("That was too short. Try again.", "error"); blob = null; return; }
     // A working meter never reports exactly zero, even in a silent room. Exactly zero
     // means the analyser failed, so trust the recording rather than discard it.
     // Only a near-dead signal is discarded: real speech with auto-gain off often peaks
@@ -125,15 +130,9 @@
     $("playback").src = URL.createObjectURL(blob);
     $("rec").hidden = true;
     $("review").hidden = false;
-    let msg = "Listen back. If it sounds right, save it.", warn = false;
-    if (clipFrac > 0.02) {
-      msg = "It sounds a bit loud and may be distorted. Hold the phone a little further away and record again if you can.";
-      warn = true;
-    } else if (peak > 0 && peak < QUIET) {
-      msg = "That sounded quiet. Hold the phone closer and record again, or save it if it plays back clearly.";
-      warn = true;
-    }
-    status(msg, warn);
+    status(clipFrac > 0.02
+      ? "That was quite loud and may be distorted. Move the phone further away and record again if you can."
+      : "Listen back. If it sounds right, save it.", clipFrac > 0.02 ? "notice" : "");
   }
 
   $("rec").addEventListener("click", () => {
@@ -155,19 +154,19 @@
     fd.append("peak", peak.toFixed(4));
     fd.append("clip_fraction", clipFrac.toFixed(4));
     try { show(await api(app.dataset.upload, fd)); }
-    catch (e) { status(`Couldn't save: ${e.message}. Check your connection and tap Save again.`, true); }
+    catch (e) { status(`Couldn't save: ${e.message}. Check your connection and tap Save again.`, "error"); }
     finally { $("save").disabled = false; }
   });
 
   $("skip").addEventListener("click", async () => {
     const fd = new FormData(); fd.append("prompt_id", prompt.id);
-    try { show(await api(app.dataset.skip, fd)); } catch (e) { status(e.message, true); }
+    try { show(await api(app.dataset.skip, fd)); } catch (e) { status(e.message, "error"); }
   });
 
   if (!window.MediaRecorder || !navigator.mediaDevices) {
-    status("This browser can't record audio. Open this page in Chrome.", true);
+    status("This browser can't record audio. Open this page in Chrome.", "error");
     $("rec").disabled = true;
   } else {
-    api(app.dataset.next).then(show).catch((e) => status(e.message, true));
+    api(app.dataset.next).then(show).catch((e) => status(e.message, "error"));
   }
 })();
