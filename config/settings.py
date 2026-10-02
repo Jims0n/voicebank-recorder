@@ -61,6 +61,10 @@ WSGI_APPLICATION = "config.wsgi.application"
 DATABASE_URL = env("DATABASE_URL") or f"sqlite:///{BASE_DIR / 'db.sqlite3'}"
 DATABASES = {"default": dj_database_url.parse(
     DATABASE_URL, conn_max_age=600, conn_health_checks=True)}
+if "pooler" in DATABASE_URL:
+    # PgBouncer in transaction mode cannot reuse server-side prepared statements, which
+    # psycopg creates by default. Neon's pooled endpoint fails without this.
+    DATABASES["default"].setdefault("OPTIONS", {})["prepare_threshold"] = None
 
 LANGUAGE_CODE = "en-gb"
 TIME_ZONE = "Africa/Lagos"

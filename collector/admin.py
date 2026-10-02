@@ -4,6 +4,10 @@ from django.utils.html import format_html
 
 from .models import Prompt, Recording, Speaker
 
+# Phones with auto-gain disabled deliver speech at roughly 0.02-0.03 of full scale,
+# so this sits below normal rather than at some textbook "healthy level".
+QUIET_PEAK = 0.01
+
 
 class AudioQualityFilter(admin.SimpleListFilter):
     """Triage hundreds of clips without listening to every one."""
@@ -15,11 +19,11 @@ class AudioQualityFilter(admin.SimpleListFilter):
                 ("short", "Very short"), ("nometer", "No level reading"), ("ok", "No flags")]
 
     def queryset(self, request, qs):
-        flags = (Q(clip_fraction__gt=0.02) | Q(peak_level__lt=0.05)
+        flags = (Q(clip_fraction__gt=0.02) | Q(peak_level__lt=QUIET_PEAK)
                  | Q(duration_ms__lt=1000))
         return {
             "clipped": qs.filter(clip_fraction__gt=0.02),
-            "quiet": qs.filter(peak_level__gt=0, peak_level__lt=0.05),
+            "quiet": qs.filter(peak_level__gt=0, peak_level__lt=QUIET_PEAK),
             "short": qs.filter(duration_ms__lt=1000),
             "nometer": qs.filter(peak_level=0),
             "ok": qs.exclude(flags),
@@ -80,20 +84,20 @@ class RecordingAdmin(admin.ModelAdmin):
     def prompt_text(self, obj):
         return obj.prompt.display_text
 
-    @admin.display(description="quality")
+    @admin.display(description="quality", ordering="peak_level")
     def quality(self, obj):
         flags = []
         if obj.clip_fraction > 0.02:
             flags.append("clipped")
-        if 0 < obj.peak_level < 0.05:
+        if 0 < obj.peak_level < QUIET_PEAK:
             flags.append("quiet")
         if obj.peak_level == 0:
             flags.append("no meter")
         if obj.duration_ms < 1000:
             flags.append("short")
-        if not flags:
-            return format_html('<span style="color:#0b7a55">ok</span>')
-        return format_html('<span style="color:#d7263d">{}</span>', ", ".join(flags))
+        return format_html(
+            '<span style="color:{}">{}</span><br><small>peak {:.3f}</small>',
+            "#d7263d" if flags else "#0b7a55", ", ".join(flags) or "ok", obj.peak_level)
 
     def player(self, obj):
         return format_html('<audio controls preload="none" src="{}" style="height:32px"></audio>', obj.audio.url)
