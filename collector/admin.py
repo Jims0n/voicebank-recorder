@@ -4,9 +4,9 @@ from django.utils.html import format_html
 
 from .models import Prompt, Recording, Speaker
 
-# Phones with auto-gain disabled deliver speech at roughly 0.02-0.03 of full scale,
-# so this sits below normal rather than at some textbook "healthy level".
-QUIET_PEAK = 0.01
+# Set from the observed distribution (n=537): p05 0.029, median 0.122, p90 0.491.
+# Sits at the 5th percentile so it flags the genuinely quiet tail, not every clip.
+QUIET_PEAK = 0.03
 
 
 class AudioQualityFilter(admin.SimpleListFilter):
@@ -71,7 +71,7 @@ class PromptAdmin(admin.ModelAdmin):
 
 @admin.register(Recording)
 class RecordingAdmin(admin.ModelAdmin):
-    list_display = ("created_at", "speaker", "prompt_text", "player", "duration_ms",
+    list_display = ("created_at", "speaker", "prompt_text", "expected", "player", "duration_ms",
                     "quality", "status", "transcript_override")
     list_editable = ("status", "transcript_override")
     list_filter = ("status", AudioQualityFilter, NeedsTranscriptFilter, "prompt__mode",
@@ -83,6 +83,13 @@ class RecordingAdmin(admin.ModelAdmin):
 
     def prompt_text(self, obj):
         return obj.prompt.display_text
+
+    @admin.display(description="ground truth")
+    def expected(self, obj):
+        # Lets a reviewer check the spoken amount against what the prompt asked for.
+        ents = {k: v for k, v in (obj.prompt.entities or {}).items() if k != "intent"}
+        return format_html("<small>{}</small>",
+                           ", ".join(f"{k}={v}" for k, v in ents.items()) or "—")
 
     @admin.display(description="quality", ordering="peak_level")
     def quality(self, obj):
