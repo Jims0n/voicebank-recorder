@@ -23,6 +23,7 @@ Notes
 """
 import re
 import shutil
+import subprocess
 import tempfile
 from pathlib import Path
 
@@ -47,6 +48,19 @@ def normalise(text):
     return re.sub(r"\s+", " ", text).strip()
 
 
+def load_audio(path):
+    """Decode to 16 kHz mono float32 with ffmpeg. faster-whisper's own decoder goes
+    through PyAV, whose API changes break it across versions."""
+    import numpy as np
+    res = subprocess.run(
+        ["ffmpeg", "-nostdin", "-loglevel", "error", "-i", path,
+         "-ac", "1", "-ar", "16000", "-f", "f32le", "pipe:1"],
+        capture_output=True)
+    if res.returncode:
+        raise RuntimeError(res.stderr.decode()[:200])
+    return np.frombuffer(res.stdout, dtype=np.float32)
+
+
 class Command(BaseCommand):
     help = "Draft transcripts for untranscribed elicited clips using Whisper."
 
@@ -63,6 +77,8 @@ class Command(BaseCommand):
             from faster_whisper import WhisperModel
         except ImportError:
             raise CommandError("pip install faster-whisper")
+        if not shutil.which("ffmpeg"):
+            raise CommandError("ffmpeg not found on PATH (brew install ffmpeg)")
 
         # Read clips are deliberately out of scope: an empty override there means the
         # exact prompt transcript is the label, and a draft would replace a correct one.
@@ -94,12 +110,17 @@ class Command(BaseCommand):
                 with r.audio.open("rb") as src:
                     shutil.copyfileobj(src, tmp)
                 tmp.flush()
-                # Nigerian Pidgin has no Whisper language token, so we force English
-                # and let the words fall where they may.
-                segments, _info = model.transcribe(
-                    tmp.name, language="en", beam_size=5, initial_prompt=PRIMER,
-                    vad_filter=True, condition_on_previous_text=False)
-                segments = list(segments)
+                try:
+                    audio = load_audio(tmp.name)
+                except RuntimeError as e:
+                    self.stderr.write(f"could not decode {r.id}: {e}")
+                    continue
+            # Nigerian Pidgin has no Whisper language token, so we force English
+            # and let the words fall where they may.
+            segments, _info = model.transcribe(
+                audio, language="en", beam_size=5, initial_prompt=PRIMER,
+                vad_filter=True, condition_on_previous_text=False)
+            segments = list(segments)
             text = normalise(" ".join(s.text for s in segments))
             logprob = min((s.avg_logprob for s in segments), default=0.0)
 
@@ -114,6 +135,9 @@ class Command(BaseCommand):
                     review_note=f"{DRAFT_MARK} logprob={logprob:.2f}")
                 saved += 1
 
+        if o["dry_run"]:
+            self.stdout.write(self.style.SUCCESS(f"\nDry run: {done} clips transcribed, nothing saved."))
+            return
         self.stdout.write(self.style.SUCCESS(
             f"\n{saved} of {done} clips drafted. In the admin, filter "
             f"Transcript -> 'Whisper draft, unchecked' and correct each by ear. "
