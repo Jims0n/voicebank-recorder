@@ -192,6 +192,10 @@ class ExportSplitTests(TestCase):
 
 
 class LabelTests(TestCase):
+    def test_draft_normaliser_keeps_numbers_readable(self):
+        from collector.management.commands.prefill_transcripts import normalise
+        self.assertEqual(normalise("Send ₦5,000 to Tunde."), "send 5000 to tunde")
+        self.assertEqual(normalise("Abeg, send 1.5k now!"), "abeg send 1.5k now")
     def test_override_wins_over_prompt_transcript(self):
         speaker, prompt = make_speaker(), make_prompt()
         rec = Recording(speaker=speaker, prompt=prompt)

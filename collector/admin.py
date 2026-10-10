@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.db.models import Count, Q, Sum
 from django.utils.html import format_html
 
-from .models import Prompt, Recording, Speaker
+from .models import DRAFT_MARK, Prompt, Recording, Speaker
 
 # Set from the observed distribution (n=537): p05 0.029, median 0.122, p90 0.491.
 # Sits at the 5th percentile so it flags the genuinely quiet tail, not every clip.
@@ -36,12 +36,15 @@ class NeedsTranscriptFilter(admin.SimpleListFilter):
     parameter_name = "needs_transcript"
 
     def lookups(self, request, model_admin):
-        return [("yes", "Missing (elicited)"), ("no", "Present")]
+        return [("yes", "Missing (elicited)"), ("draft", "Whisper draft, unchecked"),
+                ("no", "Present")]
 
     def queryset(self, request, qs):
         missing = Q(transcript_override="") & Q(prompt__transcript="")
         if self.value() == "yes":
             return qs.filter(missing)
+        if self.value() == "draft":
+            return qs.filter(review_note__startswith=DRAFT_MARK)
         if self.value() == "no":
             return qs.exclude(missing)
         return qs
@@ -112,6 +115,13 @@ class RecordingAdmin(admin.ModelAdmin):
     @admin.action(description="Approve selected")
     def approve(self, request, qs):
         qs.update(status="approved")
+
+    def save_model(self, request, obj, form, change):
+        # Editing or re-statusing a row by hand means a human has checked the draft.
+        # Bulk actions bypass this on purpose, so they never clear the marker.
+        if form.changed_data and obj.review_note.startswith(DRAFT_MARK):
+            obj.review_note = ""
+        super().save_model(request, obj, form, change)
 
     @admin.action(description="Reject selected")
     def reject(self, request, qs):

@@ -17,6 +17,9 @@ NIGERIAN_STATES = [
 ]
 STATE_CHOICES = [(s, s) for s in NIGERIAN_STATES] + [("outside", "Outside Nigeria")]
 
+# review_note prefix for machine-drafted transcripts no human has checked yet.
+DRAFT_MARK = "whisper-draft"
+
 
 def new_speaker_code():
     # Short, pseudonymous, readable over the phone. Used for resume + withdrawal.

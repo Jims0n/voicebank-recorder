@@ -13,9 +13,16 @@ Fix this before the first recording. Changing it later means relabelling everyth
 ## Pidgin spelling (one form per word)
 abeg · wetin · dey · don · wan · am · na · comot · una · sef · oya · make (not "mek") ·
 dem (not "them" when it's the Pidgin plural marker) · e (it/he/she) · no be · wey (not "we") ·
-na him · na so · that one
+na him · na so · that one · aza (account details) · milli (million) · omo · no correct ·
+go (meaning "to": "send am go gtb") · guy ("my guy")
 
 Add to this list as new words appear, and never spell the same word two ways.
+
+## Natural variation and code-switching
+Keep repetitions, false starts and added words ("my guy", "now now") exactly as spoken.
+Speakers often answer an English prompt in Pidgin. Transcribe what was said; the
+prompt's `language` field describes the prompt, not the speech, and is re-tagged from
+the final transcript at export.
 
 ## Confirm and cancel
 Treat these as the highest-stakes labels in the set. A confirm mislabelled as a cancel

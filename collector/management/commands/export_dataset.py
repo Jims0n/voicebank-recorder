@@ -16,10 +16,12 @@ from pathlib import Path
 
 from django.core.management.base import BaseCommand, CommandError
 
-from collector.models import Recording
+from collector.models import DRAFT_MARK, Recording
+
+DEV_SHARE, TEST_SHARE = 0.1, 0.2
 
 
-def split_for(code, dev, test):
+def split_for(code, dev=DEV_SHARE, test=TEST_SHARE):
     h = int(hashlib.sha256(code.encode()).hexdigest(), 16) % 1000 / 1000
     return "test" if h < test else "dev" if h < test + dev else "train"
 
@@ -31,8 +33,8 @@ class Command(BaseCommand):
         p.add_argument("out", type=Path)
         p.add_argument("--include-pending", action="store_true",
                        help="export pending as well as approved (for quick experiments)")
-        p.add_argument("--dev", type=float, default=0.1)
-        p.add_argument("--test", type=float, default=0.2)
+        p.add_argument("--dev", type=float, default=DEV_SHARE)
+        p.add_argument("--test", type=float, default=TEST_SHARE)
 
     def handle(self, *a, **o):
         if not shutil.which("ffmpeg"):
@@ -42,6 +44,10 @@ class Command(BaseCommand):
         statuses = ["approved", "pending"] if o["include_pending"] else ["approved"]
         qs = (Recording.objects.filter(status__in=statuses, speaker__withdrawn=False)
               .select_related("speaker", "prompt"))
+        drafts = qs.filter(review_note__startswith=DRAFT_MARK).count()
+        qs = qs.exclude(review_note__startswith=DRAFT_MARK)
+        if drafts:
+            self.stderr.write(f"skipping {drafts} clips whose Whisper draft has not been checked")
 
         files = {s: open(out / f"{s}.jsonl", "w", encoding="utf-8") for s in ("train", "dev", "test")}
         counts = {s: 0 for s in files}
