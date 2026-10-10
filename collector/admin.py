@@ -105,9 +105,10 @@ class RecordingAdmin(admin.ModelAdmin):
             flags.append("no meter")
         if obj.duration_ms < 1000:
             flags.append("short")
+        # format_html escapes args to strings first, so numeric format specs must be applied here.
         return format_html(
-            '<span style="color:{}">{}</span><br><small>peak {:.3f}</small>',
-            "#d7263d" if flags else "#0b7a55", ", ".join(flags) or "ok", obj.peak_level)
+            '<span style="color:{}">{}</span><br><small>peak {}</small>',
+            "#d7263d" if flags else "#0b7a55", ", ".join(flags) or "ok", f"{obj.peak_level:.3f}")
 
     def player(self, obj):
         return format_html('<audio controls preload="none" src="{}" style="height:32px"></audio>', obj.audio.url)

@@ -176,6 +176,21 @@ class WithdrawalTests(TestCase):
         self.assertContains(res, "wasn&#x27;t found")
 
 
+@isolated
+class AdminTests(TestCase):
+    def test_recording_changelist_renders(self):
+        """Every list column runs per row, so one bad format string takes the page down."""
+        from django.contrib.auth.models import User
+        speaker = make_speaker()
+        Recording.objects.create(speaker=speaker, prompt=make_prompt(), audio=clip(),
+                                 mime_type="audio/webm", duration_ms=1200, peak_level=0.1222,
+                                 clip_fraction=0.03)
+        self.client.force_login(User.objects.create_superuser("admin", "a@example.com", "pw"))
+        res = self.client.get(reverse("admin:collector_recording_changelist"))
+        self.assertEqual(res.status_code, 200)
+        self.assertContains(res, "peak 0.122")
+
+
 class ExportSplitTests(TestCase):
     def test_split_is_deterministic_and_speaker_disjoint(self):
         codes = [f"SPK{i:03d}" for i in range(500)]
