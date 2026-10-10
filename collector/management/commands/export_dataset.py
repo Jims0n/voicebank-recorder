@@ -9,6 +9,7 @@ Requires ffmpeg on PATH.
 """
 import hashlib
 import json
+import re
 import shutil
 import subprocess
 import tempfile
@@ -19,6 +20,22 @@ from django.core.management.base import BaseCommand, CommandError
 from collector.models import DRAFT_MARK, Recording
 
 DEV_SHARE, TEST_SHARE = 0.1, 0.2
+NUMBER_WORDS = set(
+    "zero oh one two three four five six seven eight nine ten eleven twelve thirteen "
+    "fourteen fifteen sixteen seventeen eighteen nineteen twenty thirty forty fifty "
+    "sixty seventy eighty ninety hundred thousand million milli k point and naira".split())
+
+
+def read_instruction(prompt, transcript):
+    """True when an elicited clip is the speaker reading the scenario aloud
+    ("the app is about to send... tell it to stop") rather than giving a command.
+    The speech is still valid ASR data, but the intent label does not describe it."""
+    if prompt.mode != "elicited" or not transcript:
+        return False
+    scene = set(re.sub(r"[^a-z ]", " ", prompt.display_text.lower()).split())
+    # Spoken amounts never match the scenario's digits, so leave them out of the ratio.
+    said = [w for w in transcript.split() if w not in NUMBER_WORDS]
+    return len(said) >= 5 and sum(w in scene for w in said) / len(said) >= 0.8
 
 
 def split_for(code, dev=DEV_SHARE, test=TEST_SHARE):
@@ -74,6 +91,7 @@ class Command(BaseCommand):
                 "audio": str(dest.relative_to(out)),
                 "text": r.label,                      # empty for untranscribed elicited clips
                 "needs_transcription": not r.label,
+                "read_instruction": read_instruction(pr, r.label),
                 "mode": pr.mode, "language": pr.language, "intent": pr.intent,
                 "entities": pr.entities, "template_id": pr.template_id,
                 "speaker": sp.code, "gender": sp.gender, "age_band": sp.age_band,

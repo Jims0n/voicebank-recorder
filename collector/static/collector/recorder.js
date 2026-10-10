@@ -30,7 +30,7 @@
     const elicited = p.mode === "elicited";
     document.querySelector(".prompt").classList.toggle("elicited", elicited);
     $("instruction").textContent = elicited
-      ? `In your own words, in ${p.language === "pidgin" ? "Pidgin" : "English"}:`
+      ? `Don't read this out. Say what you would say to the app, in ${p.language === "pidgin" ? "Pidgin" : "English"}:`
       : "Read this aloud, the way you normally talk:";
     $("prompt").textContent = p.text;
     $("count").textContent = p.progress;

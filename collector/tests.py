@@ -207,6 +207,19 @@ class ExportSplitTests(TestCase):
 
 
 class LabelTests(TestCase):
+    def test_primer_echo_is_detected(self):
+        from collector.management.commands.prefill_transcripts import echoes_primer
+        self.assertTrue(echoes_primer("oya send five thousand naira give tunde wetin dey"))
+        self.assertFalse(echoes_primer("abeg send five k give musa"))
+
+    def test_reading_the_scenario_aloud_is_flagged(self):
+        from collector.management.commands.export_dataset import read_instruction
+        p = make_prompt(mode="elicited", transcript="", intent="cancel",
+                        display_text="The app is about to send ₦150,000 to the wrong person. Tell it to stop.")
+        self.assertTrue(read_instruction(p, "the app is about to send one hundred and fifty "
+                                            "thousand naira to the wrong person tell it to stop"))
+        self.assertFalse(read_instruction(p, "abeg stop am no send am"))
+        self.assertFalse(read_instruction(p, "stop the one point five k you about to send is not the legitimate person"))
     def test_draft_normaliser_keeps_numbers_readable(self):
         from collector.management.commands.prefill_transcripts import normalise
         self.assertEqual(normalise("Send ₦5,000 to Tunde."), "send 5000 to tunde")

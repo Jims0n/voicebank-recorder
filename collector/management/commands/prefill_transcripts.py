@@ -36,6 +36,14 @@ from collector.models import DRAFT_MARK, Recording
 # vocabulary; on near-silent audio it can echo back, which the reviewer will catch.
 PRIMER = ("abeg send five thousand naira give tunde wetin dey my account "
           "oya send am no be am make you buy two k airtime for my line")
+_PW = PRIMER.split()
+PRIMER_4GRAMS = {" ".join(_PW[i:i + 4]) for i in range(len(_PW) - 3)}
+
+
+def echoes_primer(text):
+    """True when Whisper has copied primer wording instead of transcribing the clip."""
+    w = text.split()
+    return any(" ".join(w[i:i + 4]) in PRIMER_4GRAMS for i in range(len(w) - 3))
 
 
 def normalise(text):
@@ -130,6 +138,10 @@ class Command(BaseCommand):
                               f"          whisper: {text or '(nothing heard)'}  "
                               f"(logprob {logprob:.2f})")
             if not o["dry_run"] and text:
+                if echoes_primer(text):
+                    # Leave it blank so it stays under "Missing" and gets typed by ear.
+                    self.stdout.write(self.style.WARNING("          primer echo, not saved"))
+                    continue
                 Recording.objects.filter(id=r.id, transcript_override="").update(
                     transcript_override=text,
                     review_note=f"{DRAFT_MARK} logprob={logprob:.2f}")
