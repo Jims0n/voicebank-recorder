@@ -29,3 +29,11 @@ Open http://localhost:8000. The mic works on localhost; on any other host it nee
 - Review clips at /admin/collector/recording/ (approve, reject, transcribe elicited).
   The page title shows usable hours so far.
 - Export: `python manage.py export_dataset ./dataset` (needs ffmpeg). Splits are by speaker.
+  - `--dry-run --test-speakers A,B --dev-speakers C` shows what each split would contain
+    (speakers, clips, hours, gender / first language / spoken language) without converting.
+    Un-nominated speakers go to train. Pass the same `--test-speakers` to `prefill_transcripts`.
+  - Audio is loudness-normalised; `--no-normalise` keeps raw levels (export to a separate
+    folder). Reruns reuse wavs made with the same settings; `--force` reconverts.
+  - `spoken_language` is detected from the final transcript (`collector/language.py`);
+    `language` is still the prompt's language. `--exclude-instruction-read` drops clips
+    whose review note is `instruction_read`.

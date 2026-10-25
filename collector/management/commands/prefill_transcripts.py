@@ -15,7 +15,8 @@ Notes
 - Only touches elicited clips with an empty transcript_override.
 - Never overwrites anything you have already typed.
 - Skips test-split speakers by default, so evaluation references are typed from
-  scratch and cannot be anchored to Whisper's own output.
+  scratch and cannot be anchored to Whisper's own output. If you nominate test
+  speakers in export_dataset, pass the same --test-speakers here.
 - Every draft is stamped in review_note; the admin filter "Whisper draft, unchecked"
   lists them, and editing a row by hand clears the stamp.
 - Output is lowercased with punctuation stripped, per LABELLING.md. Whisper will
@@ -29,7 +30,7 @@ from pathlib import Path
 
 from django.core.management.base import BaseCommand, CommandError
 
-from collector.management.commands.export_dataset import split_for
+from collector.management.commands.export_dataset import assign_split, speaker_codes
 from collector.models import DRAFT_MARK, Recording
 
 # Primes Whisper toward the house spelling and spelled-out amounts. It only biases
@@ -79,6 +80,10 @@ class Command(BaseCommand):
         p.add_argument("--dry-run", action="store_true", help="print, don't save")
         p.add_argument("--include-test", action="store_true",
                        help="also draft test-split speakers (biases your evaluation)")
+        p.add_argument("--test-speakers", type=speaker_codes, action="extend", default=[],
+                       metavar="CODE,CODE",
+                       help="the test speakers you nominate in export_dataset; without this "
+                       "the hash split decides who is held out")
 
     def handle(self, *a, **o):
         try:
@@ -96,8 +101,10 @@ class Command(BaseCommand):
               .order_by("created_at"))
         clips = list(qs)
         if not o["include_test"]:
-            held_out = [r for r in clips if split_for(r.speaker.code) == "test"]
-            clips = [r for r in clips if split_for(r.speaker.code) != "test"]
+            test_spk = set(o["test_speakers"])
+            is_test = lambda r: assign_split(r.speaker.code, test_spk) == "test"  # noqa: E731
+            held_out = [r for r in clips if is_test(r)]
+            clips = [r for r in clips if not is_test(r)]
             if held_out:
                 self.stdout.write(f"Skipping {len(held_out)} test-split clips; type those by ear.")
         if o["limit"]:

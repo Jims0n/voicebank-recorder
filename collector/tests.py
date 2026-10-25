@@ -1,5 +1,14 @@
+import array
+import io
+import json
+import math
 import shutil
+import subprocess
 import tempfile
+import wave
+from collections import Counter
+from pathlib import Path
+from unittest import skipUnless
 
 from django.conf import settings
 from django.core.cache import cache
@@ -8,7 +17,7 @@ from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
-from collector.management.commands.export_dataset import split_for
+from collector.management.commands.export_dataset import SPLITS, split_for
 from collector.models import Prompt, Recording, Speaker
 
 MEDIA = tempfile.mkdtemp(prefix="voicebank-test-")
@@ -261,3 +270,192 @@ class PromptGenerationTests(TestCase):
             for language in ("pidgin", "english"):
                 n = Prompt.objects.filter(intent=intent, language=language).count()
                 self.assertGreaterEqual(n, 10, f"{language} {intent} prompts are too few ({n})")
+
+
+class SpokenLanguageTests(TestCase):
+    def detect(self, text):
+        from collector.language import detect_spoken_language
+        return detect_spoken_language(text)
+
+    def test_pidgin_markers_fire_and_are_reported(self):
+        cases = {
+            "abeg send five k give tunde": {"abeg", "give <name>"},
+            "wetin dey my account": {"wetin", "dey"},
+            "make you cancel am": {"make you", "am (object)"},
+            "send am go gtb": {"am (object)", "go <name>"},
+            "no be am": {"no be", "am (object)"},
+            "i wan send fifteen k to chidi": {"wan"},
+            "send two fifty k enter femi account": {"enter <account>"},
+            "e no correct": {"e", "no correct"},
+        }
+        for text, expected in cases.items():
+            guess = self.detect(text)
+            self.assertEqual(guess.language, "pidgin", text)
+            self.assertTrue(expected <= set(guess.pidgin_markers), (text, guess.pidgin_markers))
+
+    def test_english_look_alikes_do_not_fire(self):
+        for text in ("i am sending money to tunde", "go ahead and send it", "give me my balance",
+                     "give tunde five k", "how much am i owing", "please give it to ade",
+                     "send it to the wrong account at eight am"):
+            guess = self.detect(text)
+            self.assertEqual(guess.pidgin_markers, [], text)
+            self.assertIn(guess.language, ("english", "ambiguous"), text)
+
+    def test_marker_free_commands_are_ambiguous_and_empty_is_none(self):
+        self.assertEqual(self.detect("check my balance").language, "ambiguous")
+        self.assertEqual(self.detect("yes").language, "ambiguous")
+        self.assertIsNone(self.detect("").language)
+
+    def test_english_prompt_answered_in_pidgin(self):
+        guess = self.detect("abeg the app make you stop am")
+        self.assertEqual(guess.language, "pidgin")
+        self.assertIn("the", guess.english_markers)   # recorded, but Pidgin wins
+
+    def test_no_read_prompt_is_tagged_as_the_other_language(self):
+        """Read prompts have a known language; the detector may abstain, never contradict."""
+        from django.core.management import call_command
+        call_command("generate_prompts", verbosity=0)
+        found = Counter()
+        for lang, text in Prompt.objects.filter(mode="read").values_list("language", "transcript"):
+            guess = self.detect(text).language
+            self.assertNotIn({lang, guess}, [{"pidgin", "english"}], text)
+            found[lang, guess] += 1
+        pidgin_total = found["pidgin", "pidgin"] + found["pidgin", "ambiguous"]
+        self.assertGreater(found["pidgin", "pidgin"] / pidgin_total, 0.8)
+
+
+class SplitAssignmentTests(TestCase):
+    def test_nominated_speakers_go_where_told_and_the_rest_train(self):
+        from collector.management.commands.export_dataset import assign_split
+        self.assertEqual(assign_split("AAA", {"AAA"}, {"BBB"}), "test")
+        self.assertEqual(assign_split("BBB", {"AAA"}, {"BBB"}), "dev")
+        self.assertEqual(assign_split("CCC", {"AAA"}, {"BBB"}), "train")
+        self.assertEqual(assign_split("CCC"), split_for("CCC"))
+
+    def test_codes_parse_from_comma_lists(self):
+        from collector.management.commands.export_dataset import speaker_codes
+        self.assertEqual(speaker_codes("ab12cd, EF34GH,"), ["AB12CD", "EF34GH"])
+
+
+def tone(volume, seconds=2.5):
+    """A real, decodable clip at a given level (peak ≈ volume)."""
+    res = subprocess.run(
+        ["ffmpeg", "-nostdin", "-loglevel", "error", "-f", "lavfi",
+         "-i", f"sine=f=220:d={seconds},volume={volume}", "-ac", "2", "-f", "wav", "pipe:1"],
+        capture_output=True, check=True)
+    return SimpleUploadedFile("clip.wav", res.stdout, content_type="audio/wav")
+
+
+def rms_dbfs(path):
+    with wave.open(str(path)) as w:
+        assert (w.getframerate(), w.getnchannels(), w.getsampwidth()) == (16000, 1, 2)
+        samples = array.array("h", w.readframes(w.getnframes()))
+    return 20 * math.log10(math.sqrt(sum(s * s for s in samples) / len(samples)) / 32768)
+
+
+EXPORT_MEDIA = tempfile.mkdtemp(prefix="voicebank-export-test-")
+
+
+@skipUnless(shutil.which("ffmpeg"), "ffmpeg not installed")
+@override_settings(MEDIA_ROOT=EXPORT_MEDIA,
+                   STORAGES={"default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+                             "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"}})
+class ExportCommandTests(TestCase):
+    @classmethod
+    def tearDownClass(cls):
+        shutil.rmtree(EXPORT_MEDIA, ignore_errors=True)
+        super().tearDownClass()
+
+    def setUp(self):
+        self.out = Path(tempfile.mkdtemp(prefix="voicebank-export-out-"))
+        self.addCleanup(shutil.rmtree, self.out, ignore_errors=True)
+        self.quiet = make_speaker(code="QUIET1", gender="male", first_language="igbo")
+        self.loud = make_speaker(code="LOUD22", gender="female", first_language="yoruba")
+        self.other = make_speaker(code="OTHER3", gender="female", first_language="hausa")
+        english = make_prompt(mode="elicited", transcript="", intent="transfer",
+                              display_text="Ask the app to send ₦5,000 to Tunde.")
+        self.rec = {}
+        for speaker, volume, said, note in (
+                (self.quiet, 0.02, "abeg send five k give tunde", ""),
+                (self.loud, 0.9, "send five thousand naira to tunde", ""),
+                (self.other, 0.3, "ask the app to send five thousand naira to tunde", "instruction_read")):
+            self.rec[speaker.code] = Recording.objects.create(
+                speaker=speaker, prompt=english, audio=tone(volume), mime_type="audio/wav",
+                duration_ms=2500, peak_level=volume, status="approved",
+                transcript_override=said, review_note=note)
+
+    def export(self, *args, out=None):
+        from django.core.management import call_command
+        buf = io.StringIO()
+        call_command("export_dataset", str(out or self.out), *args, stdout=buf, stderr=io.StringIO())
+        return buf.getvalue()
+
+    def manifest(self, split, out=None):
+        path = (out or self.out) / f"{split}.jsonl"
+        return [json.loads(line) for line in path.read_text().splitlines()]
+
+    def test_nominated_split_is_speaker_disjoint_and_reported(self):
+        text = self.export("--test-speakers", "quiet1", "--dev-speakers", "LOUD22")
+        self.assertEqual({r["speaker"] for r in self.manifest("test")}, {"QUIET1"})
+        self.assertEqual({r["speaker"] for r in self.manifest("dev")}, {"LOUD22"})
+        self.assertEqual({r["speaker"] for r in self.manifest("train")}, {"OTHER3"})
+        report = json.loads((self.out / "split_report.json").read_text())["splits"]
+        self.assertEqual(report["test"]["gender"], {"male": {"speakers": 1, "clips": 1}})
+        self.assertEqual(report["test"]["spoken_language"], {"pidgin": 1})
+        self.assertIn("QUIET1 (M, igbo, 1)", text)
+
+    def test_bad_nominations_are_rejected(self):
+        from django.core.management.base import CommandError
+        with self.assertRaises(CommandError):
+            self.export("--test-speakers", "QUIET1", "--dev-speakers", "QUIET1")
+        with self.assertRaises(CommandError):
+            self.export("--test-speakers", "NOSUCH")
+
+    def test_rows_keep_old_fields_and_add_language_and_instruction_flags(self):
+        self.export("--test-speakers", "QUIET1")
+        rows = {r["speaker"]: r for s in SPLITS for r in self.manifest(s)}
+        pidgin = rows["QUIET1"]
+        self.assertEqual((pidgin["language"], pidgin["prompt_language"]), ("english", "english"))
+        self.assertEqual(pidgin["spoken_language"], "pidgin")
+        self.assertIn("give <name>", pidgin["pidgin_markers"])
+        for key in ("audio", "text", "needs_transcription", "read_instruction", "mode", "intent",
+                    "entities", "template_id", "gender", "age_band", "first_language", "state",
+                    "environment", "duration_ms"):
+            self.assertIn(key, pidgin)
+        self.assertTrue(rows["OTHER3"]["instruction_read"])
+        self.assertFalse(rows["OTHER3"]["usable_for_intent"])
+        self.assertTrue(rows["LOUD22"]["usable_for_intent"])
+
+    def test_instruction_reads_can_be_excluded(self):
+        self.export("--test-speakers", "QUIET1", "--exclude-instruction-read")
+        speakers = {r["speaker"] for s in SPLITS for r in self.manifest(s)}
+        self.assertEqual(speakers, {"QUIET1", "LOUD22"})
+
+    def test_loudness_is_normalised_unless_disabled(self):
+        self.export()
+        raw_out = self.out / "raw"
+        self.export("--no-normalise", out=raw_out)
+        wav = lambda root, code: root / "audio" / code / f"{self.rec[code].id}.wav"  # noqa: E731
+        normed_gap = rms_dbfs(wav(self.out, "LOUD22")) - rms_dbfs(wav(self.out, "QUIET1"))
+        raw_gap = rms_dbfs(wav(raw_out, "LOUD22")) - rms_dbfs(wav(raw_out, "QUIET1"))
+        self.assertGreater(raw_gap, 30)          # 0.9 vs 0.02 peak is ~33 dB
+        self.assertLess(abs(normed_gap), 1.5)
+        rows = {r["speaker"]: r for s in SPLITS for r in self.manifest(s)}
+        self.assertTrue(rows["QUIET1"]["loudness_normalised"])
+        self.assertLess(rows["QUIET1"]["input_lufs"], rows["LOUD22"]["input_lufs"])
+
+    def test_rerun_reuses_wavs_until_settings_change_or_forced(self):
+        self.assertIn("3 converted, 0 reused", self.export())
+        before = (self.out / "train.jsonl").read_text() + (self.out / "test.jsonl").read_text()
+        self.assertIn("0 converted, 3 reused", self.export())
+        after = (self.out / "train.jsonl").read_text() + (self.out / "test.jsonl").read_text()
+        self.assertEqual(before, after)
+        self.assertIn("3 converted, 0 reused", self.export("--no-normalise"))
+        self.assertIn("3 converted, 0 reused", self.export("--no-normalise", "--force"))
+
+    def test_dry_run_writes_nothing(self):
+        out = self.out / "dry"
+        text = self.export("--dry-run", "--test-speakers", "QUIET1", out=out)
+        self.assertFalse(out.exists())
+        self.assertIn("DRY RUN", text)
+        self.assertIn("SPOKEN LANGUAGE", text)

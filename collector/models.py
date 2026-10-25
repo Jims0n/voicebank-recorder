@@ -19,6 +19,9 @@ STATE_CHOICES = [(s, s) for s in NIGERIAN_STATES] + [("outside", "Outside Nigeri
 
 # review_note prefix for machine-drafted transcripts no human has checked yet.
 DRAFT_MARK = "whisper-draft"
+# review_note for clips where the speaker read the task instruction aloud instead of
+# performing it: valid speech for ASR, but the prompt's intent does not describe it.
+INSTRUCTION_READ = "instruction_read"
 
 
 def new_speaker_code():

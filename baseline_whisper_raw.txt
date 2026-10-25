@@ -1,0 +1,300 @@
+Skipping 10 test-split clips; type those by ear.
+Loading Whisper large-v3 (first run downloads ~1.5 GB)…
+[1/148] YLENF9  prompt: Ask the app to send ₦1,500 to Bola's Zenith a
+          whisper: let me send 152 bolas zenith account number  (logprob -0.48)
+[2/148] YLENF9  prompt: Ask the app to buy ₦1,000 Airtel airtime.
+          whisper: let me buy 1000 a time a day  (logprob -0.45)
+[3/148] YLENF9  prompt: Ask the app to send ₦15,000 to Segun.
+          whisper: at me send fifteen thousand naira to shagun  (logprob -0.59)
+[4/148] YLENF9  prompt: The app asks: send ₦75,000 to Funmi? That is 
+          whisper: yes  (logprob -0.77)
+[5/148] YLENF9  prompt: Ask the app to send ₦1,000 to Zenith account 
+          whisper: let me send one thousand naira to this zenith account six two nine nine three four one four zero six  (logprob -0.28)
+[6/148] YLENF9  prompt: Ask the app to send ₦1,000,000 to Ngozi's UBA
+          whisper: help me send one million naira to ingozi gba account  (logprob -0.44)
+[7/148] YLENF9  prompt: Ask the app to send ₦500,000 to Ibrahim.
+          whisper: let me send 500 k 3 brian  (logprob -0.68)
+[8/148] YLENF9  prompt: Ask the app to send ₦25,000 to Halima's Monie
+          whisper: help me send 25 000 naira to alizman money point account  (logprob -0.64)
+[9/148] YLENF9  prompt: Ask the app to send ₦500 to Bola's UBA accoun
+          whisper: i be send five hundred naira to bolla's uba account  (logprob -0.54)
+[10/148] YLENF9  prompt: Ask the app to buy ₦200 Airtel airtime.
+          whisper: if you help me buy 200 naira airtime  (logprob -0.41)
+[11/148] YLENF9  prompt: Ask the app to pay ₦50,000 for your GOtv subs
+          whisper: pay fifty thousand naira for my good tv subscription  (logprob -0.45)
+[12/148] YLENF9  prompt: The app asks: send ₦5,000 to Aisha? That is w
+          whisper: yes  (logprob -0.85)
+[13/148] YLENF9  prompt: Ask the app to pay ₦500 for your EKEDC subscr
+          whisper: pay five hundred naira for my ekedc subscription  (logprob -0.41)
+[14/148] YLENF9  prompt: Ask the app to send ₦2,500,000 to Tunde's Zen
+          whisper: help me send two million five hundred thousand naira to tunde's zenith account  (logprob -0.37)
+[15/148] YLENF9  prompt: Ask the app to pay ₦500 for your EKEDC subscr
+          whisper: pay five hundred naira for my eked subscription  (logprob -0.36)
+[16/148] M4RJM2  prompt: Ask the app to send ₦1,500 to Aisha's UBA acc
+          whisper: ask the app to send one thousand five hundred naira to asha ubs account  (logprob -0.43)
+[17/148] M4RJM2  prompt: The app read back the wrong amount. Tell it t
+          whisper: dey app wit bag dey gohanga man tell e to stop  (logprob -0.64)
+[18/148] M4RJM2  prompt: The app is about to send ₦15,000 to the wrong
+          whisper: the app is about to send fifteen thousand naira to the wrong person tell it to stop  (logprob -0.36)
+[19/148] M4RJM2  prompt: Ask the app to send ₦1,500 to Musa's Fidelity
+          whisper: ask the app to send one thousand five hundred to muscle fidelity accounts  (logprob -0.46)
+[20/148] M4RJM2  prompt: Ask the app to buy ₦2,000 9mobile airtime.
+          whisper: as the app to buy two thousand naira name mobile a time  (logprob -0.65)
+[21/148] M4RJM2  prompt: Ask the app to send ₦1,000 to First Bank acco
+          whisper: ask the app to send one thousand naira to my first bank account eight eight one eight two four seven two seven five  (logprob -0.32)
+[22/148] M4RJM2  prompt: The app is about to send ₦1,000 to the wrong 
+          whisper: the app is about to send one thousand naira to the wrong person tell it to stop  (logprob -0.26)
+[23/148] M4RJM2  prompt: Ask the app to pay ₦15,000 for your Startimes
+          whisper: ask the app to pay fifteen thousand naira for your start time subscription  (logprob -0.40)
+[24/148] M4RJM2  prompt: Ask the app to buy ₦1,000 9mobile airtime.
+          whisper: as apt to buy one thousand naira my mobile a time  (logprob -0.64)
+[25/148] M4RJM2  prompt: The app is about to send ₦250,000 to the wron
+          whisper: the app is about to send 250 000 naira to the one person tell it to stop  (logprob -0.29)
+[26/148] M4RJM2  prompt: Ask the app to pay ₦100,000 for your GOtv sub
+          whisper: ask the app to pay hundred thousand naira for your gold series subscription  (logprob -0.45)
+[27/148] 2HC3BH  prompt: Ask the app to buy ₦500 9mobile airtime.
+          whisper: come by five hundred naira nine mobile airtime  (logprob -0.40)
+[28/148] 2HC3BH  prompt: Ask the app to send ₦2,500 to Ade's GTB accou
+          whisper: send two thousand five hundred naira to add this gtb account  (logprob -0.44)
+[29/148] 2HC3BH  prompt: The app asks: send ₦2,500 to Segun? That is w
+          whisper: send two thousand five hundred naira to shegun that is what you wanted  (logprob -0.24)
+[30/148] 2HC3BH  prompt: Ask the app to send ₦5,000 to Segun.
+          whisper: help me send five thousand naira to shegun help me send five thousand naira to shegun  (logprob -0.27)
+[31/148] 2HC3BH  prompt: Ask the app to send ₦50,000 to Yusuf's GTB ac
+          whisper: send fifty thousand naira to yusuf gtb account  (logprob -0.44)
+[32/148] 2HC3BH  prompt: The app read back the wrong amount. Tell it t
+          whisper: dey hap don do kasalau make is topo  (logprob -0.74)
+[33/148] 2HC3BH  prompt: Ask the app to buy ₦500 Airtel airtime.
+          whisper: buy five hundred hair till hell time  (logprob -0.81)
+[34/148] 2HC3BH  prompt: Ask the app to send ₦25,000 to UBA account 31
+          whisper: make you send twenty five thousand naira to uba account three one one three four six one zero seven zero  (logprob -0.30)
+[35/148] 2HC3BH  prompt: Ask the app to send ₦50,000 to Zainab.
+          whisper: send fifty thousand naira to zaynab send fifty thousand naira to zaynab  (logprob -0.45)
+[36/148] 2HC3BH  prompt: Ask the app to send ₦25,000 to Musa.
+          whisper: make you send 25000 era to musa now  (logprob -0.33)
+[37/148] 2HC3BH  prompt: Ask the app to send ₦1,500 to Obinna.
+          whisper: make you send one thousand five hundred naira to obina  (logprob -0.47)
+[38/148] TLH6K2  prompt: The app asks: send ₦500,000 to Yusuf? That is
+          whisper: the app asks send 500 to yusuf that is what you wanted tell it yes  (logprob -0.46)
+[39/148] TLH6K2  prompt: The app asks: send ₦100,000 to Halima? That i
+          whisper: the app axe send hundred down to a lima that is what you wanted tell it yes  (logprob -0.60)
+[40/148] TLH6K2  prompt: Ask the app to send ₦75,000 to Obinna.
+          whisper: ask the app to send 75000 to robina  (logprob -0.79)
+[41/148] TLH6K2  prompt: Ask the app to buy ₦100 Airtel airtime.
+          whisper: ask see up to burn a narrator a time  (logprob -1.08)
+[42/148] VADK3Q  prompt: Ask the app to send ₦100,000 to UBA account 4
+          whisper: ask the app to send one hundred thousand to uv account four six one five eight eight six five six six  (logprob -0.43)
+[43/148] VADK3Q  prompt: Ask the app to send ₦2,000 to Emeka.
+          whisper: ask the app to send 2k to america  (logprob -0.63)
+[44/148] VADK3Q  prompt: Ask the app to send ₦1,500 to Palmpay account
+          whisper: ask the app to send one five to pumpy account number three seven seven zero one eight two four nine  (logprob -0.41)
+[45/148] VADK3Q  prompt: Ask the app to send ₦5,000 to Zainab.
+          whisper: back make you send 5k gives an up  (logprob -0.49)
+[46/148] VADK3Q  prompt: The app is about to send ₦75,000 to the wrong
+          whisper: make you stop  (logprob -0.58)
+[47/148] VADK3Q  prompt: Ask the app to send ₦1,000 to Obinna.
+          whisper: you should send one thousand naira to ubinna  (logprob -0.42)
+[48/148] VADK3Q  prompt: The app is about to send ₦25,000 to the wrong
+          whisper: make you stop or the money where you want sent no be the correct person  (logprob -0.44)
+[49/148] VADK3Q  prompt: Ask the app to show you what you have spent r
+          whisper: our make you show me how much why does adam spend recently  (logprob -0.46)
+[50/148] VADK3Q  prompt: The app is about to send ₦1,500 to the wrong 
+          whisper: stop the 1500 naira you about to send is not the legitimate person  (logprob -0.32)
+[51/148] 5P664Q  prompt: Ask the app to buy ₦1,000 Airtel airtime.
+          whisper: i'll be well one doesn't anything from a to  (logprob -0.70)
+[52/148] 5P664Q  prompt: Ask the app to pay ₦500 for your Startimes su
+          whisper: oya send five thousand naira for my strata in subscription  (logprob -0.79)
+[53/148] 5P664Q  prompt: Ask the app to buy ₦1,000 9mobile airtime.
+          whisper: only qp or by one doesn't know it at time for my name  (logprob -0.71)
+[54/148] 5P664Q  prompt: The app is about to send ₦2,500 to the wrong 
+          whisper: how far was top o no sender no sender no the wrong person  (logprob -0.89)
+[55/148] 5P664Q  prompt: Ask the app to pay ₦5,000 for your Startimes 
+          whisper: r4p for dollars last times for a five key subscription appeal  (logprob -0.81)
+[56/148] 5P664Q  prompt: The app is about to send ₦2,000 to the wrong 
+          whisper: off of a stop stop listen  (logprob -0.73)
+[57/148] 5P664Q  prompt: The app is about to send ₦100,000 to the wron
+          whisper: oh no no no stop the 100 key stop stop  (logprob -0.73)
+[58/148] 4L4KSR  prompt: The app is about to send ₦150,000 to the wron
+          whisper: the app is about to send one and three thousand at a wrong person tell it to stop  (logprob -0.27)
+[59/148] 4L4KSR  prompt: Ask the app to pay ₦20,000 for your GOtv subs
+          whisper: ask the app to pay twenty thousand naira for your good tv subscription  (logprob -0.32)
+[60/148] 4L4KSR  prompt: Ask the app to send ₦1,500 to Zenith account 
+          whisper: ask the app to send one five to zenith account thirty nine seven zero two six nine nine four seven  (logprob -0.40)
+[61/148] 4L4KSR  prompt: The app is about to send ₦25,000 to the wrong
+          whisper: the app is about to send 25000 naira to a wrong person tell it to stop  (logprob -0.37)
+[62/148] 4L4KSR  prompt: The app asks: send ₦25,000 to Kemi? That is w
+          whisper: the app axe said 25000 to carry that is what you wanted tell it yes  (logprob -0.42)
+[63/148] 4L4KSR  prompt: Ask the app to send ₦5,000 to Yusuf.
+          whisper: ask the app to send five thousand naira to yusuf  (logprob -0.49)
+[64/148] 4L4KSR  prompt: The app is about to send ₦2,500,000 to the wr
+          whisper: the app is about to send two million of our return error to the wrong person tell it to stop  (logprob -0.39)
+[65/148] 4L4KSR  prompt: Ask the app to send ₦2,500 to Fidelity accoun
+          whisper: ask the app to send two thousand five hundred naira to fidelity account four four six seven four two two two zero zero  (logprob -0.36)
+[66/148] 4L4KSR  prompt: Ask the app to send ₦50,000 to Zainab's Palmp
+          whisper: ask dey app to send fifty thousand naira to zeina pounds per account  (logprob -0.66)
+[67/148] 4L4KSR  prompt: Ask the app to send ₦2,500,000 to Halima's Mo
+          whisper: ask the app to send two million five hundred to her lima money point account  (logprob -0.50)
+[68/148] 4L4KSR  prompt: The app asks: send ₦25,000 to Ade? That is wh
+          whisper: the app accent 25 turner to a day that is what you wanted tell it yes  (logprob -0.46)
+[69/148] 6X24SR  prompt: Ask the app to send ₦500,000 to Yusuf's Zenit
+          whisper: send five hundred thousand naira to yusuf's zenith account  (logprob -0.57)
+[70/148] 6X24SR  prompt: The app has read your transfer back to you an
+          whisper: go ahead and send it  (logprob -0.51)
+[71/148] 6X24SR  prompt: Ask the app to buy ₦2,000 Airtel airtime.
+          whisper: buy two thousand naira airtime  (logprob -0.54)
+[72/148] 6X24SR  prompt: Ask the app how much money is in your account
+          whisper: how much is in my account  (logprob -0.54)
+[73/148] 5P83VJ  prompt: Ask the app to send ₦1,500 to UBA account 762
+          whisper: ask the app to send one thousand five hundred naira to uba account 76 24 72 49 64  (logprob -0.43)
+[74/148] 5P83VJ  prompt: Ask the app to send ₦5,000 to Ibrahim.
+          whisper: ask dey app to send five k to you brian  (logprob -0.67)
+[75/148] 5P83VJ  prompt: Ask the app to send ₦10,000 to Chidi's Access
+          whisper: aks dey hap to send ten thousand naira to chidi's access account  (logprob -0.60)
+[76/148] 5P83VJ  prompt: The app is about to send ₦50,000 to the wrong
+          whisper: the app is about to send fifty thousand naira to the wrong person tell it to stop  (logprob -0.29)
+[77/148] 5P83VJ  prompt: The app has read your transfer back to you an
+          whisper: the app has read your transfer back to you and it is correct tell it to go ahead and send  (logprob -0.29)
+[78/148] 5P83VJ  prompt: Ask the app to buy ₦1,000 9mobile airtime.
+          whisper: axia to buy one thousand naira nine mobile a time  (logprob -0.80)
+[79/148] 5P83VJ  prompt: The app is about to send ₦10,000 to the wrong
+          whisper: the app is about to send 10000 to the wrong person tell it to stop  (logprob -0.24)
+[80/148] 34NTVM  prompt: Ask the app to send ₦150,000 to Segun's Fidel
+          whisper: i beg send 150k to shegun's fidelity accounts  (logprob -0.55)
+[81/148] 5P83VJ  prompt: The app is about to send ₦1,000 to the wrong 
+          whisper: the app is about to send one thousand naira to the wrong person tell it to stop  (logprob -0.21)
+[82/148] 34NTVM  prompt: Ask the app to send ₦2,500 to Moniepoint acco
+          whisper: i beg help me send 2 500 naira to moneypoint account nine four three four five nine three nine six  (logprob -0.34)
+[83/148] 5P83VJ  prompt: Ask the app to buy ₦1,000 MTN airtime.
+          whisper: oya send five thousand naira give tunde wetin dey my account oya send five thousand naira give tunde  (logprob -0.62)
+[84/148] JCL3DH  prompt: Ask the app to pay ₦1,000 for your GOtv subsc
+          whisper: i beg p1 key for my good cv subscription  (logprob -0.53)
+[85/148] 5P83VJ  prompt: Ask the app to send ₦2,000 to Blessing's Firs
+          whisper: ask dey have to send two thousand naira to blessing first bank account  (logprob -0.49)
+[86/148] JCL3DH  prompt: Ask the app to pay ₦2,000 for your Startimes 
+          whisper: help me pay two key for my start time subscription  (logprob -0.69)
+[87/148] JCL3DH  prompt: Ask the app to send ₦2,000 to Yusuf.
+          whisper: send two kids you sooth  (logprob -0.93)
+[88/148] JCL3DH  prompt: Ask the app to buy ₦100 MTN airtime.
+          whisper: help me buy hundred naira mtn airtime  (logprob -0.63)
+[89/148] JCL3DH  prompt: Ask the app to buy ₦1,000 MTN airtime.
+          whisper: help me buy one k airtime one k mtn airtime  (logprob -0.48)
+[90/148] JCL3DH  prompt: Ask the app to send ₦5,000 to Kuda account 92
+          whisper: i bek send five k to kuda account nine two eight two seven one six three eight eights  (logprob -0.41)
+[91/148] JCL3DH  prompt: Ask the app to send ₦1,500 to Uche's GTB acco
+          whisper: i be extend one five to which is gb gtb bank i be extend one five to which is gtb accounts  (logprob -0.38)
+[92/148] JCL3DH  prompt: The app asks: send ₦75,000 to Zainab? That is
+          whisper: oh yes send it to zainab  (logprob -0.60)
+[93/148] JCL3DH  prompt: The app asks: send ₦5,000 to Amaka? That is w
+          whisper: yes send five kids to amaka  (logprob -0.77)
+[94/148] JCL3DH  prompt: Ask the app to pay ₦50,000 for your IKEDC sub
+          whisper: i beg help me pay 50k for my ikedc subscription  (logprob -0.43)
+[95/148] JCL3DH  prompt: Ask the app to buy ₦2,000 9mobile airtime.
+          whisper: buy me two thousand naira name about airtime  (logprob -0.52)
+[96/148] BUTNJS  prompt: The app asks: send ₦1,500 to Funmi? That is w
+          whisper: yes now i'm five a bronzer in two for me  (logprob -0.83)
+[97/148] BUTNJS  prompt: Ask the app to send ₦1,000 to Kuda account 22
+          whisper: help me send one thousand naira to this kuda account two two seven seven three one three nine four eight  (logprob -0.42)
+[98/148] BUTNJS  prompt: The app is about to send ₦2,000 to the wrong 
+          whisper: stop that sasa we want you now personally john  (logprob -0.89)
+[99/148] BUTNJS  prompt: Ask the app to send ₦20,000 to GTB account 27
+          whisper: send twenty thousand naira to this gtb bank account two seven five nine one five nine nine zero eight  (logprob -0.36)
+[100/148] BUTNJS  prompt: Ask the app to pay ₦500,000 for your EKEDC su
+          whisper: be 500000 error for eke dc electricity subscription  (logprob -0.57)
+[101/148] BUTNJS  prompt: Ask the app to send ₦20,000 to Ibrahim.
+          whisper: send twenty thousand naira give you brain  (logprob -0.57)
+[102/148] BUTNJS  prompt: Ask the app to buy ₦500 MTN airtime.
+          whisper: we charge by number five hundred naira we charge by number five hundred naira  (logprob -0.45)
+[103/148] BUTNJS  prompt: Ask the app to pay ₦2,000 for your IKEDC subs
+          whisper: make a two thousand air suspicion for the ikgc  (logprob -0.76)
+[104/148] BUTNJS  prompt: Ask the app to pay ₦15,000 for your EKEDC sub
+          whisper: be 15000 for ekg suspicion  (logprob -0.55)
+[105/148] BUTNJS  prompt: Ask the app to send ₦75,000 to Zenith account
+          whisper: send seventy five thousand naira enter this zenith account number nine eight six eight zero three seven two four two  (logprob -0.41)
+[106/148] BUTNJS  prompt: Ask the app to pay ₦1,000,000 for your GOtv s
+          whisper: be a millionaire for my good tv subscription  (logprob -0.46)
+[107/148] BUTNJS  prompt: Ask the app to send ₦25,000 to Femi's Palmpay
+          whisper: have me send twenty five thousand naira enter for me pump your account  (logprob -0.69)
+[108/148] 2Z5MVD  prompt: Ask the app to send ₦2,500,000 to Moniepoint 
+          whisper: send two point five million goodis money point account four one three six eight nine five three two one  (logprob -0.39)
+[109/148] 2Z5MVD  prompt: Ask the app to buy ₦1,000 Airtel airtime.
+          whisper: could you buy me one thousand naira airtel airtime  (logprob -0.47)
+[110/148] 2Z5MVD  prompt: The app asks: send ₦50,000 to Halima? That is
+          whisper: yes i want to send 50000 to halima  (logprob -0.37)
+[111/148] 2Z5MVD  prompt: The app asks: send ₦150,000 to Segun? That is
+          whisper: yes i won't send 150000 cool showroom  (logprob -0.57)
+[112/148] 2Z5MVD  prompt: Ask the app to buy ₦1,000 MTN airtime.
+          whisper: let me buy one thousand empty and airtime  (logprob -0.44)
+[113/148] 2Z5MVD  prompt: The app asks: send ₦150,000 to Blessing? That
+          whisper: yes i'll me send 150000 to blessing  (logprob -0.51)
+[114/148] 2Z5MVD  prompt: Ask the app to pay ₦1,500 for your Startimes 
+          whisper: pay one thousand five hundred naira for my start time subscription  (logprob -0.41)
+[115/148] 2Z5MVD  prompt: The app asks: send ₦25,000 to Ade? That is wh
+          whisper: yes i want to send 25 000 naira to adi  (logprob -0.36)
+[116/148] 2Z5MVD  prompt: Ask the app how much money is in your account
+          whisper: how much money dey my account  (logprob -0.43)
+[117/148] 2Z5MVD  prompt: Ask the app to show you what you have spent r
+          whisper: show me what i spent recently  (logprob -0.55)
+[118/148] 2Z5MVD  prompt: Ask the app to send ₦75,000 to Funmi's Access
+          whisper: send 75 000 naira to fumi's access account  (logprob -0.51)
+[119/148] 2Z5MVD  prompt: The app asks: send ₦75,000 to Emeka? That is 
+          whisper: yes i won't send 75000 give you make up  (logprob -0.44)
+[120/148] 2Z5MVD  prompt: Ask the app to pay ₦10,000 for your Startimes
+          whisper: p 10000 area for my start time subscription  (logprob -0.54)
+[121/148] 2Z5MVD  prompt: Ask the app to send ₦250,000 to UBA account 5
+          whisper: send two hundred and fifty thousand naira to uba account five five nine one one zero one one seven seven  (logprob -0.30)
+[122/148] XRX29Q  prompt: The app is about to send ₦2,500 to the wrong 
+          whisper: the app is about to send two thousand five hundred naira to the person tell it to stop  (logprob -0.42)
+[123/148] XRX29Q  prompt: Ask the app to send ₦500,000 to Ibrahim's Zen
+          whisper: ask the app to send 500000 to ibrahim's venet account  (logprob -0.49)
+[124/148] XRX29Q  prompt: Ask the app to send ₦150,000 to Halima.
+          whisper: ask the app to send on a 50000 are to alima  (logprob -0.60)
+[125/148] XRX29Q  prompt: The app asks: send ₦2,500 to Tunde? That is w
+          whisper: the app asks send two thousand five hundred naira to tunde that is what you wanted tell it yet  (logprob -0.39)
+[126/148] XRX29Q  prompt: Ask the app to send ₦100,000 to Yusuf's First
+          whisper: ask the app to send one hundred thousand naira to yusuf's first bank account  (logprob -0.52)
+[127/148] XRX29Q  prompt: Ask the app to send ₦250,000 to Segun.
+          whisper: ask the app to send two hundred and fifty thousand naira to shaygon  (logprob -0.50)
+[128/148] XRX29Q  prompt: Ask the app to pay ₦500 for your Startimes su
+          whisper: ask the app to pay five hundred now for your style time subscription  (logprob -0.46)
+[129/148] XRX29Q  prompt: Ask the app to send ₦250,000 to GTB account 5
+          whisper: ask the app to send 250000 to gtb account five to six eight three nine seven six five seven  (logprob -0.40)
+[130/148] XRX29Q  prompt: The app is about to send ₦1,000 to the wrong 
+          whisper: the app is about to send one thousand naira to the wrong person tell it to stop  (logprob -0.41)
+[131/148] XRX29Q  prompt: Ask the app to send ₦20,000 to GTB account 27
+          whisper: ask the app to send 20000 to get a beer account two seven five nine one five nine nine zero eight  (logprob -0.31)
+[132/148] XRX29Q  prompt: Ask the app to send ₦25,000 to Halima's Monie
+          whisper: ask the app to send 25000 to alimass moneypoint account  (logprob -0.51)
+[133/148] XRX29Q  prompt: Ask the app to send ₦2,500 to Fidelity accoun
+          whisper: ask the app to send two thousand five hundred to fidelity account four four six seven four two two two zero zero  (logprob -0.33)
+[134/148] XRX29Q  prompt: Ask the app to buy ₦1,000 Airtel airtime.
+          whisper: ask the app to buy one thousand era at a time  (logprob -0.47)
+[135/148] XRX29Q  prompt: The app is about to send ₦100,000 to the wron
+          whisper: dey person is about to send one dey thousand to dey one person tell dey to stop  (logprob -0.49)
+[136/148] WAF735  prompt: Ask the app to send ₦1,500 to Palmpay account
+          whisper: as they have to send one five two pampi accounts three seven seven zero one eight two four nine four  (logprob -0.63)
+[137/148] WAF735  prompt: Ask the app to pay ₦10,000 for your Startimes
+          whisper: ask the app to send thank you for your start time subscription  (logprob -0.54)
+[138/148] WAF735  prompt: Ask the app to buy ₦100 MTN airtime.
+          whisper: out they have to buy 100 naira empty in a time  (logprob -0.49)
+[139/148] WAF735  prompt: The app is about to send ₦1,500 to the wrong 
+          whisper: stop sending down five to the person  (logprob -0.55)
+[140/148] WAF735  prompt: The app asks: send ₦25,000 to Ade? That is wh
+          whisper: yes senten five key to id yes senten five key to id  (logprob -0.72)
+[141/148] WAF735  prompt: Ask the app to buy ₦1,000 9mobile airtime.
+          whisper: buy one thousand naira airtime on my mobile  (logprob -0.54)
+[142/148] WAF735  prompt: Ask the app to send ₦500,000 to Ibrahim.
+          whisper: peace and fife when you tell them that you've been  (logprob -1.17)
+[143/148] WAF735  prompt: Ask the app to send ₦2,500 to GTB account 693
+          whisper: since the love of an era to gcp account six nine three four nine four eight six hour  (logprob -0.86)
+[144/148] WAF735  prompt: The app read back the wrong amount. Tell it t
+          whisper: stop you are using wrong amounts  (logprob -0.55)
+[145/148] WAF735  prompt: The app asks: send ₦75,000 to Funmi? That is 
+          whisper: yes exactly same same 25000 or at the foot  (logprob -0.86)
+[146/148] WAF735  prompt: Ask the app to send ₦10,000 to First Bank acc
+          whisper: send thank you go facebook 437 331 531  (logprob -0.72)
+[147/148] WAF735  prompt: Ask the app to send ₦25,000 to Blessing.
+          whisper: sentence five k give blessing  (logprob -1.03)
+[148/148] WAF735  prompt: The app is about to send ₦1,000 to the wrong 
+          whisper: stop on stop on stop on it is saying one key give the wrong person  (logprob -0.46)
+
+148 of 148 clips drafted. In the admin, filter Transcript -> 'Whisper draft, unchecked' and correct each by ear. Numbers as words.
