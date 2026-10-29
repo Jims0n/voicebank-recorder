@@ -294,9 +294,11 @@ class Command(BaseCommand):
             "audio": str((out / "audio" / sp.code / f"{r.id}.wav").relative_to(out)),
             "text": r.label,                      # empty for untranscribed elicited clips
             "needs_transcription": not r.label,
-            "read_instruction": heuristic,        # transcript heuristic, unreviewed
+            "read_instruction": heuristic,        # advisory transcript heuristic; never decides usability
             "instruction_read": flagged,          # reviewer marked it in review_note
-            "usable_for_intent": not (flagged or heuristic),
+            # Reviewer flag only: the heuristic misfires on short commands that share
+            # the prompt's vocabulary (15 of 17 unreviewed hits were genuine commands).
+            "usable_for_intent": not flagged,
             "mode": pr.mode,
             "language": pr.language,              # kept for compatibility: the PROMPT's language
             "prompt_language": pr.language,
@@ -419,7 +421,7 @@ class Command(BaseCommand):
         if tally["heuristic_only"]:
             notes.append(f"{tally['heuristic_only']} clips look like instruction reads by "
                          f"transcript but are not marked '{INSTRUCTION_READ}'; review them "
-                         "(already usable_for_intent=false)")
+                         "(still usable_for_intent=true until you mark them)")
         if tally["too_quiet_to_normalise"]:
             notes.append(f"{tally['too_quiet_to_normalise']} clips were too quiet to measure "
                          "and were converted at raw level")

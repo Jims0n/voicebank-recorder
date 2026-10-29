@@ -426,6 +426,15 @@ class ExportCommandTests(TestCase):
         self.assertFalse(rows["OTHER3"]["usable_for_intent"])
         self.assertTrue(rows["LOUD22"]["usable_for_intent"])
 
+    def test_heuristic_alone_does_not_change_usability(self):
+        Recording.objects.filter(speaker=self.other).update(review_note="")
+        text = self.export("--exclude-instruction-read")
+        rows = {r["speaker"]: r for s in SPLITS for r in self.manifest(s)}
+        self.assertTrue(rows["OTHER3"]["read_instruction"])
+        self.assertFalse(rows["OTHER3"]["instruction_read"])
+        self.assertTrue(rows["OTHER3"]["usable_for_intent"])
+        self.assertIn("1 clips look like instruction reads by transcript", text)
+
     def test_instruction_reads_can_be_excluded(self):
         self.export("--test-speakers", "QUIET1", "--exclude-instruction-read")
         speakers = {r["speaker"] for s in SPLITS for r in self.manifest(s)}
