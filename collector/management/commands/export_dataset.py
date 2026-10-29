@@ -29,6 +29,7 @@ from collections import Counter
 from pathlib import Path
 
 from django.core.management.base import BaseCommand, CommandError
+from django.db import connection
 
 from collector.language import detect_spoken_language
 from collector.models import DRAFT_MARK, INSTRUCTION_READ, Recording, Speaker
@@ -238,6 +239,12 @@ class Command(BaseCommand):
         qs = qs.exclude(review_note__startswith=DRAFT_MARK)
         if drafts:
             self.stderr.write(f"skipping {drafts} clips whose Whisper draft has not been checked")
+        # Fetch everything now and release the connection before the slow part. A
+        # server-side cursor held open across minutes of download + ffmpeg gets its
+        # connection dropped by hosted Postgres (Neon) mid-export. Rows are small.
+        recordings = list(qs)
+        if not connection.in_atomic_block:
+            connection.close()          # reopens automatically if anything queries later
 
         conv_path = out / CONVERSIONS
         conversions = {}
@@ -251,7 +258,7 @@ class Command(BaseCommand):
         marker_counts = Counter()
         exported_ids = set()
         try:
-            for r in qs.iterator():
+            for r in recordings:
                 if o["exclude_instruction_read"] and is_instruction_read(r):
                     tally["instruction_read_excluded"] += 1
                     continue
