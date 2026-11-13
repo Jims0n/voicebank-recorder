@@ -10,3 +10,4 @@ staticfiles/
 dataset/
 backups/
 .DS_Store
+results/
