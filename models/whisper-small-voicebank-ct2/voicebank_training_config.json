@@ -1,0 +1,33 @@
+{
+ "base_model": "openai/whisper-small",
+ "language": "en",
+ "lora_r": 32,
+ "lora_alpha": 64,
+ "lora_dropout": 0.05,
+ "lora_targets": [
+  "q_proj",
+  "k_proj",
+  "v_proj",
+  "out_proj"
+ ],
+ "learning_rate": 0.001,
+ "epochs": 12,
+ "batch_size": 8,
+ "grad_accum": 2,
+ "warmup_steps": 30,
+ "seed": 42,
+ "aug_prob": 0.8,
+ "speed_factors": [
+  0.9,
+  1.0,
+  1.1
+ ],
+ "noise_snr_db": [
+  10,
+  30
+ ],
+ "gain_db": [
+  -6,
+  6
+ ]
+}
